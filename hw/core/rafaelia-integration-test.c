@@ -7,9 +7,10 @@
 
 #include "hw/core/rafaelia-integration.h"
 #include "hw/core/rafaelia-core.h"
-#include "qemu/osdep.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 /* External connector initialization functions */
 int rafaelia_userland_connector_init(rafaelia_connector_t *conn);

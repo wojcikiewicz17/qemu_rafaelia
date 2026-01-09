@@ -6,9 +6,11 @@
  */
 
 #include "hw/core/rafaelia-integration.h"
-#include "qemu/osdep.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 
 /* Internal state */
 static uint64_t next_request_id = 1;

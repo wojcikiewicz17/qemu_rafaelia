@@ -1,0 +1,35 @@
+# RAFAELIA Matrix Core - Minimal build
+# No abstractions, deterministic compilation
+
+CC=gcc
+CFLAGS=-O2 -Wall -Wno-unused-function -fno-strict-aliasing
+LDFLAGS=-lm
+
+MATRIX_CORE=rafaelia-matrix-core
+REFACTORED=rafaelia-refactored
+
+all: test
+
+matrix: $(MATRIX_CORE).c $(MATRIX_CORE).h rafaelia-matrix-test.c
+	$(CC) $(CFLAGS) -DTEST_STANDALONE -I. \
+		$(MATRIX_CORE).c rafaelia-matrix-test.c \
+		-o matrix-test $(LDFLAGS)
+
+refactored: $(MATRIX_CORE).c $(MATRIX_CORE).h \
+            $(REFACTORED).c $(REFACTORED).h \
+            rafaelia-refactored-test.c
+	$(CC) $(CFLAGS) -DTEST_STANDALONE -I. \
+		$(MATRIX_CORE).c $(REFACTORED).c rafaelia-refactored-test.c \
+		-o refactored-test $(LDFLAGS)
+
+test: matrix refactored
+	@echo "=== Matrix Test ==="
+	./matrix-test || true
+	@echo ""
+	@echo "=== Refactored Test ==="
+	./refactored-test || true
+
+clean:
+	rm -f matrix-test refactored-test *.o
+
+.PHONY: all matrix refactored test clean

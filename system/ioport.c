@@ -62,6 +62,7 @@ const MemoryRegionOps unassigned_io_ops = {
 void cpu_outb(uint32_t addr, uint8_t val)
 {
     trace_cpu_out(addr, 'b', val);
+    /* Direct write for better performance */
     address_space_write(&address_space_io, addr, MEMTXATTRS_UNSPECIFIED,
                         &val, 1);
 }
@@ -90,6 +91,7 @@ uint8_t cpu_inb(uint32_t addr)
 {
     uint8_t val;
 
+    /* Optimized single-byte read */
     address_space_read(&address_space_io, addr, MEMTXATTRS_UNSPECIFIED,
                        &val, 1);
     trace_cpu_in(addr, 'b', val);

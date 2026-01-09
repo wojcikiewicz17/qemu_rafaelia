@@ -126,7 +126,7 @@ double y3(void) {
     
     double t11=(t10<C7)?-t10:t10;
     double t12=i0(t11,C0);
-    double t13=i0(t12,0.5);
+    double t13=i0(t12,C13);
     
     return t13;
 }

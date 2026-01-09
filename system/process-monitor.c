@@ -118,7 +118,8 @@ void qemu_process_monitor_get_rates(double *loop_rate, double *kick_rate,
     qemu_mutex_lock(&stats_mutex);
     
     int64_t current_time = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
-    int64_t elapsed_ns = current_time - process_stats.last_update_time;
+    int64_t last_time = process_stats.last_update_time;
+    int64_t elapsed_ns = current_time - last_time;
     
     if (elapsed_ns > 0) {
         double elapsed_sec = elapsed_ns / 1000000000.0;

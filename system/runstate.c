@@ -282,7 +282,7 @@ bool qemu_vmstop_requested(RunState *r)
         return false;
     }
     
-    /* Slow-path: acquire lock and clear the request */
+    /* Slow-path: acquire lock to atomically read and clear the request */
     qemu_mutex_lock(&vmstop_lock);
     *r = vmstop_requested;
     vmstop_requested = RUN_STATE__MAX;

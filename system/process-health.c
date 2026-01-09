@@ -88,22 +88,30 @@ static bool check_bql_contention(void)
 
 /*
  * Attempt to recover from a stalled main loop
+ * Note: Called without holding health_mutex to avoid blocking
  */
 static void attempt_main_loop_recovery(void)
 {
-    if (health_status.recovery_in_progress) {
+    bool already_recovering;
+    
+    qemu_mutex_lock(&health_mutex);
+    already_recovering = health_status.recovery_in_progress;
+    if (!already_recovering) {
+        health_status.recovery_in_progress = true;
+        health_status.recovery_attempts++;
+    }
+    qemu_mutex_unlock(&health_mutex);
+    
+    if (already_recovering) {
         return; /* Already recovering */
     }
-    
-    health_status.recovery_in_progress = true;
-    health_status.recovery_attempts++;
     
     error_report("Health check: Main loop appears stalled, attempting recovery");
     
     /* Recovery strategy: gentle nudge to the event loop */
     qemu_notify_event();
     
-    /* If we have CPUs, try kicking them */
+    /* If we have CPUs, try kicking them (no mutex held) */
     CPUState *cpu;
     CPU_FOREACH(cpu) {
         if (!cpu_thread_is_idle(cpu)) {
@@ -111,8 +119,10 @@ static void attempt_main_loop_recovery(void)
         }
     }
     
+    qemu_mutex_lock(&health_mutex);
     health_status.recovery_in_progress = false;
     health_status.successful_recoveries++;
+    qemu_mutex_unlock(&health_mutex);
 }
 
 /*
@@ -140,7 +150,7 @@ static void health_check_callback(void *opaque)
     
     qemu_mutex_lock(&health_mutex);
     
-    int64_t current_time = qemu_clock_get_ms(QEMU_CLOCK_REALTIME);
+    int64_t current_time_ms = qemu_clock_get_ms(QEMU_CLOCK_REALTIME);
     HealthState old_state = health_status.state;
     
     /* Check main loop progress */
@@ -154,7 +164,10 @@ static void health_check_callback(void *opaque)
         
         if (health_status.consecutive_stalls > 3) {
             health_status.state = HEALTH_STATE_CRITICAL;
+            /* Release mutex before potentially blocking recovery */
+            qemu_mutex_unlock(&health_mutex);
             attempt_main_loop_recovery();
+            qemu_mutex_lock(&health_mutex);
         } else {
             health_status.state = HEALTH_STATE_DEGRADED;
         }
@@ -163,7 +176,10 @@ static void health_check_callback(void *opaque)
         
         if (!cpu_kick_ok) {
             health_status.state = HEALTH_STATE_DEGRADED;
+            /* Release mutex before sleep */
+            qemu_mutex_unlock(&health_mutex);
             attempt_cpu_spin_recovery();
+            qemu_mutex_lock(&health_mutex);
         } else if (!bql_ok) {
             health_status.state = HEALTH_STATE_DEGRADED;
         } else {
@@ -178,12 +194,12 @@ static void health_check_callback(void *opaque)
                     state_names[old_state], state_names[health_status.state]);
     }
     
-    health_status.last_check_time = current_time;
+    health_status.last_check_time = current_time_ms;
     
     qemu_mutex_unlock(&health_mutex);
     
     /* Reschedule next check */
-    timer_mod(health_check_timer, current_time + HEALTH_CHECK_INTERVAL_MS);
+    timer_mod(health_check_timer, current_time_ms + HEALTH_CHECK_INTERVAL_MS);
 }
 
 /*

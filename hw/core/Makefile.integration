@@ -1,0 +1,90 @@
+# Makefile for RAFAELIA Integration System
+# Strategic multi-repository integration with diamond state excellence
+
+CC = gcc
+CFLAGS = -I../../include -I. -Wall -Wextra -O2 -g
+LDFLAGS = -lm -lpthread
+
+# Source files
+CORE_SRCS = rafaelia-core.c rafaelia-matrix-core.c
+INTEGRATION_SRCS = rafaelia-integration-hub.c
+CONNECTOR_SRCS = connectors/userland-connector.c \
+                 connectors/magisk-connector.c \
+                 connectors/llama-connector.c \
+                 connectors/private-connector.c
+TEST_SRCS = rafaelia-integration-test.c
+
+# Object files
+CORE_OBJS = $(CORE_SRCS:.c=.o)
+INTEGRATION_OBJS = $(INTEGRATION_SRCS:.c=.o)
+CONNECTOR_OBJS = $(CONNECTOR_SRCS:.c=.o)
+TEST_OBJS = $(TEST_SRCS:.c=.o)
+
+# Output binaries
+TEST_BIN = rafaelia-integration-test
+
+# Default target
+all: $(TEST_BIN)
+
+# Build test program
+$(TEST_BIN): $(CORE_OBJS) $(INTEGRATION_OBJS) $(CONNECTOR_OBJS) $(TEST_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	@echo ""
+	@echo "═══════════════════════════════════════════════════════"
+	@echo "  RAFAELIA Integration System Built Successfully! 💎"
+	@echo "═══════════════════════════════════════════════════════"
+	@echo ""
+
+# Compile source files
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Run test
+test: $(TEST_BIN)
+	@echo ""
+	@echo "═══════════════════════════════════════════════════════"
+	@echo "  Running RAFAELIA Integration Test Suite..."
+	@echo "═══════════════════════════════════════════════════════"
+	@echo ""
+	./$(TEST_BIN)
+
+# Clean build artifacts
+clean:
+	rm -f $(CORE_OBJS) $(INTEGRATION_OBJS) $(CONNECTOR_OBJS) $(TEST_OBJS)
+	rm -f $(TEST_BIN)
+	@echo "Build artifacts cleaned."
+
+# Clean all generated files
+distclean: clean
+	rm -f *.o connectors/*.o
+	@echo "All generated files removed."
+
+# Show build information
+info:
+	@echo "RAFAELIA Multi-Repository Integration Build System"
+	@echo "=================================================="
+	@echo "Core sources: $(CORE_SRCS)"
+	@echo "Integration sources: $(INTEGRATION_SRCS)"
+	@echo "Connector sources: $(CONNECTOR_SRCS)"
+	@echo "Test sources: $(TEST_SRCS)"
+	@echo "Output: $(TEST_BIN)"
+	@echo ""
+	@echo "Targets:"
+	@echo "  all       - Build all components (default)"
+	@echo "  test      - Build and run test suite"
+	@echo "  clean     - Remove build artifacts"
+	@echo "  distclean - Remove all generated files"
+	@echo "  info      - Show this information"
+
+# Phony targets
+.PHONY: all test clean distclean info
+
+# Dependencies
+rafaelia-core.o: rafaelia-core.c ../../include/hw/core/rafaelia-core.h
+rafaelia-matrix-core.o: rafaelia-matrix-core.c rafaelia-matrix-core.h
+rafaelia-integration-hub.o: rafaelia-integration-hub.c ../../include/hw/core/rafaelia-integration.h ../../include/hw/core/rafaelia-core.h
+connectors/userland-connector.o: connectors/userland-connector.c ../../include/hw/core/rafaelia-integration.h
+connectors/magisk-connector.o: connectors/magisk-connector.c ../../include/hw/core/rafaelia-integration.h
+connectors/llama-connector.o: connectors/llama-connector.c ../../include/hw/core/rafaelia-integration.h
+connectors/private-connector.o: connectors/private-connector.c ../../include/hw/core/rafaelia-integration.h
+rafaelia-integration-test.o: rafaelia-integration-test.c ../../include/hw/core/rafaelia-integration.h ../../include/hw/core/rafaelia-core.h

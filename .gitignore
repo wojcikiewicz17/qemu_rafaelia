@@ -23,6 +23,7 @@ GTAGS
 *.o
 rafaelia-core-test
 rafaelia-core-integration-example
+rafaelia-integration-test
 matrix-test
 refactored-test
 comparison-test

@@ -34,7 +34,7 @@ void qemu_process_monitor_init(void)
 {
     if (!stats_initialized) {
         qemu_mutex_init(&stats_mutex);
-        process_stats.last_update_time = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
+        process_stats.last_update_time = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
         stats_initialized = true;
     }
 }
@@ -101,7 +101,7 @@ void qemu_process_monitor_reset(void)
     process_stats.cpu_kicks = 0;
     process_stats.runstate_transitions = 0;
     process_stats.bql_contentions = 0;
-    process_stats.last_update_time = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
+    process_stats.last_update_time = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
     qemu_mutex_unlock(&stats_mutex);
 }
 
@@ -117,7 +117,7 @@ void qemu_process_monitor_get_rates(double *loop_rate, double *kick_rate,
 
     qemu_mutex_lock(&stats_mutex);
     
-    int64_t current_time = qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL);
+    int64_t current_time = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
     int64_t elapsed_ns = current_time - process_stats.last_update_time;
     
     if (elapsed_ns > 0) {

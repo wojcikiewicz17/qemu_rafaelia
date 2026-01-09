@@ -276,7 +276,7 @@ StatusInfo *qmp_query_status(Error **errp)
 bool qemu_vmstop_requested(RunState *r)
 {
     /* Fast-path: check without lock if no stop is pending */
-    RunState current = vmstop_requested;
+    RunState current = qatomic_read(&vmstop_requested);
     if (current == RUN_STATE__MAX) {
         *r = RUN_STATE__MAX;
         return false;

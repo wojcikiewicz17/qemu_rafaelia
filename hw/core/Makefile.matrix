@@ -22,14 +22,24 @@ refactored: $(MATRIX_CORE).c $(MATRIX_CORE).h \
 		$(MATRIX_CORE).c $(REFACTORED).c rafaelia-refactored-test.c \
 		-o refactored-test $(LDFLAGS)
 
-test: matrix refactored
+comparison: $(MATRIX_CORE).c $(MATRIX_CORE).h \
+            $(REFACTORED).c $(REFACTORED).h \
+            rafaelia-comparison.c
+	$(CC) $(CFLAGS) -DTEST_COMPARISON -I. \
+		$(MATRIX_CORE).c $(REFACTORED).c rafaelia-comparison.c \
+		-o comparison-test $(LDFLAGS)
+
+test: matrix refactored comparison
 	@echo "=== Matrix Test ==="
 	./matrix-test || true
 	@echo ""
 	@echo "=== Refactored Test ==="
 	./refactored-test || true
+	@echo ""
+	@echo "=== Comparison Test ==="
+	./comparison-test || true
 
 clean:
-	rm -f matrix-test refactored-test *.o
+	rm -f matrix-test refactored-test comparison-test *.o
 
-.PHONY: all matrix refactored test clean
+.PHONY: all matrix refactored comparison test clean

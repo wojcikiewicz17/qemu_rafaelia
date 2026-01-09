@@ -229,12 +229,13 @@ void runstate_set(RunState new_state)
 {
     assert(new_state < RUN_STATE__MAX);
 
-    trace_runstate_set(current_run_state, RunState_str(current_run_state),
-                       new_state, RunState_str(new_state));
-
+    /* Fast-path: avoid tracing and validation for no-op transitions */
     if (current_run_state == new_state) {
         return;
     }
+
+    trace_runstate_set(current_run_state, RunState_str(current_run_state),
+                       new_state, RunState_str(new_state));
 
     if (!runstate_valid_transitions[current_run_state][new_state]) {
         error_report("invalid runstate transition: '%s' -> '%s'",
@@ -274,6 +275,14 @@ StatusInfo *qmp_query_status(Error **errp)
 
 bool qemu_vmstop_requested(RunState *r)
 {
+    /* Fast-path: check without lock if no stop is pending */
+    RunState current = qatomic_read(&vmstop_requested);
+    if (current == RUN_STATE__MAX) {
+        *r = RUN_STATE__MAX;
+        return false;
+    }
+    
+    /* Slow-path: acquire lock to atomically read and clear the request */
     qemu_mutex_lock(&vmstop_lock);
     *r = vmstop_requested;
     vmstop_requested = RUN_STATE__MAX;

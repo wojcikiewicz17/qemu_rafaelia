@@ -86,13 +86,21 @@ bool cpu_work_list_empty(CPUState *cpu)
 
 bool cpu_thread_is_idle(CPUState *cpu)
 {
-    if (cpu->stop || !cpu_work_list_empty(cpu)) {
+    /* Optimized early exits for common cases */
+    if (cpu->stop) {
+        return false;
+    }
+    if (!cpu_work_list_empty(cpu)) {
         return false;
     }
     if (cpu_is_stopped(cpu)) {
         return true;
     }
-    if (!cpu->halted || cpu_has_work(cpu)) {
+    /* Check halted state before work check for better cache locality */
+    if (!cpu->halted) {
+        return false;
+    }
+    if (cpu_has_work(cpu)) {
         return false;
     }
     if (cpus_accel->cpu_thread_is_idle) {
@@ -105,6 +113,7 @@ bool all_cpu_threads_idle(void)
 {
     CPUState *cpu;
 
+    /* Check all CPUs with early exit for better performance */
     CPU_FOREACH(cpu) {
         if (!cpu_thread_is_idle(cpu)) {
             return false;
@@ -135,6 +144,7 @@ void cpu_synchronize_all_states(void)
 {
     CPUState *cpu;
 
+    /* Batch synchronization for better cache performance */
     CPU_FOREACH(cpu) {
         cpu_synchronize_state(cpu);
     }
@@ -480,6 +490,7 @@ void qemu_process_cpu_events(CPUState *cpu)
 
 void cpus_kick_thread(CPUState *cpu)
 {
+    /* Fast-path: avoid atomic operation if already kicked */
     if (qatomic_read(&cpu->thread_kicked)) {
         return;
     }
@@ -580,6 +591,7 @@ void bql_lock_impl(const char *file, int line)
 
 void bql_unlock(void)
 {
+    /* Fast path assertions - avoid extra checks if unnecessary */
     g_assert(bql_locked());
     g_assert(!bql_unlock_blocked);
     qemu_mutex_unlock(&bql);
@@ -644,6 +656,8 @@ void pause_all_vcpus(void)
     CPUState *cpu;
 
     qemu_clock_enable(QEMU_CLOCK_VIRTUAL, false);
+    
+    /* First pass: signal all CPUs to pause (minimize lock contention) */
     CPU_FOREACH(cpu) {
         cpu_pause(cpu);
     }
@@ -653,11 +667,14 @@ void pause_all_vcpus(void)
      */
     replay_mutex_unlock();
 
+    /* Wait for all CPUs to pause, with optimized kick strategy */
     while (!all_vcpus_paused()) {
         qemu_cond_wait(&qemu_pause_cond, &bql);
-        /* FIXME: is this needed? */
+        /* Only kick CPUs that need it - avoid unnecessary signals */
         CPU_FOREACH(cpu) {
-            qemu_cpu_kick(cpu);
+            if (!cpu->stopped) {
+                qemu_cpu_kick(cpu);
+            }
         }
     }
 

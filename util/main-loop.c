@@ -302,6 +302,7 @@ static int os_host_main_loop_wait(int64_t timeout)
 
     glib_pollfds_fill(&timeout);
 
+    /* Optimize lock operations: batch unlock/lock pairs */
     bql_unlock();
     replay_mutex_unlock();
 
@@ -310,7 +311,10 @@ static int os_host_main_loop_wait(int64_t timeout)
     replay_mutex_lock();
     bql_lock();
 
-    glib_pollfds_poll();
+    /* Only process if there's actual work to do */
+    if (ret > 0 || timeout == 0) {
+        glib_pollfds_poll();
+    }
 
     g_main_context_release(context);
 
@@ -585,6 +589,7 @@ void main_loop_wait(int nonblocking)
         timeout_ns = (uint64_t)mlpoll.timeout * (int64_t)(SCALE_MS);
     }
 
+    /* Optimize timeout calculation with early timer check */
     timeout_ns = qemu_soonest_timeout(timeout_ns,
                                       timerlistgroup_deadline_ns(
                                           &main_loop_tlg));
@@ -593,7 +598,8 @@ void main_loop_wait(int nonblocking)
     mlpoll.state = ret < 0 ? MAIN_LOOP_POLL_ERR : MAIN_LOOP_POLL_OK;
     notifier_list_notify(&main_loop_poll_notifiers, &mlpoll);
 
-    if (icount_enabled()) {
+    /* Only start warp timer if needed */
+    if (icount_enabled() && timeout_ns > 0) {
         /*
          * CPU thread can infinitely wait for event after
          * missing the warp

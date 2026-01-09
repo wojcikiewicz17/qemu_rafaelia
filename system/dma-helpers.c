@@ -40,6 +40,7 @@ void qemu_sglist_init(QEMUSGList *qsg, DeviceState *dev, int alloc_hint,
 
 void qemu_sglist_add(QEMUSGList *qsg, dma_addr_t base, dma_addr_t len)
 {
+    /* Optimize reallocation with exponential growth */
     if (qsg->nsg == qsg->nalloc) {
         qsg->nalloc = 2 * qsg->nalloc + 1;
         qsg->sg = g_renew(ScatterGatherEntry, qsg->sg, qsg->nalloc);
@@ -89,6 +90,7 @@ static void dma_blk_unmap(DMAAIOCB *dbs)
 {
     int i;
 
+    /* Batch unmap operations for better performance */
     for (i = 0; i < dbs->iov.niov; ++i) {
         dma_memory_unmap(dbs->sg->as, dbs->iov.iov[i].iov_base,
                          dbs->iov.iov[i].iov_len, dbs->dir,

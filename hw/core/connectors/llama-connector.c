@@ -40,6 +40,7 @@ static int llama_connect(void *config)
     llama_state.avg_inference_time_ms = 100.0;
     strncpy(llama_state.model_name, "llama-rafaelia-7b", 
             sizeof(llama_state.model_name) - 1);
+    llama_state.model_name[sizeof(llama_state.model_name) - 1] = '\0';
     
     return 0;
 }

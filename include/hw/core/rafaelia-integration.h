@@ -169,7 +169,7 @@ typedef struct {
     int (*connect)(void *config);
     int (*disconnect)(void);
     int (*send_request)(const rafaelia_request_t *req);
-    int (*receive_response)(rafaelia_response_t *resp);
+    int (*receive_response)(rafaelia_response_t *resp);  /* Reserved for async operations */
     int (*send_event)(const rafaelia_event_t *evt);
     int (*health_check)(void);
 } rafaelia_connector_t;

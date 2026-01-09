@@ -1,0 +1,38 @@
+# RAFAELIA Core Test Makefile
+# Standalone build for testing RAFAELIA core implementation
+
+CC = gcc
+CFLAGS = -Wall -Wextra -O2 -g -I../../include
+LDFLAGS = -lm
+
+TARGET = rafaelia-core-test
+SOURCES = rafaelia-core.c rafaelia-core-test.c
+OBJECTS = $(SOURCES:.c=.o)
+HEADERS = ../../include/hw/core/rafaelia-core.h
+
+.PHONY: all clean test
+
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $(TARGET)
+
+%.o: %.c $(HEADERS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+test: $(TARGET)
+	@echo "Running RAFAELIA Core Test..."
+	@echo ""
+	./$(TARGET)
+
+clean:
+	rm -f $(OBJECTS) $(TARGET)
+
+help:
+	@echo "RAFAELIA Core Build System"
+	@echo ""
+	@echo "Targets:"
+	@echo "  all     - Build the test program"
+	@echo "  test    - Build and run the test program"
+	@echo "  clean   - Remove build artifacts"
+	@echo "  help    - Show this help message"

@@ -22,6 +22,14 @@
 #include <math.h>
 
 /* RAFAELIA Constants and Literals */
+
+/*
+ * BITRAF64 Literal - UTF-8 encoded
+ * This literal contains Unicode Greek letters and mathematical symbols.
+ * Ensure your editor and compiler support UTF-8 encoding.
+ * 
+ * Symbols used: Δ (Delta), Ω (Omega), Φ (Phi), Σ (Sigma)
+ */
 #define RAFAELIA_BITRAF64 "AΔBΩΔTTΦIIBΩΔΣΣRΩRΔΔBΦΦFΔTTRRFΔBΩΣΣAFΦARΣFΦIΔRΦIFBRΦΩFIΦΩΩFΣFAΦΔ"
 #define RAFAELIA_MODE_STRING "RAFAELIA"
 #define RAFAELIA_ETHIC_STRING "Amor"

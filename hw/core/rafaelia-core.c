@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
 
 /* Core initialization */
 void rafaelia_core_init(rafaelia_core_t *core)
@@ -66,6 +67,9 @@ void rafaelia_core_init(rafaelia_core_t *core)
     
     /* Initialize stack pointer */
     core->stack_ptr = 0;
+    
+    /* Seed random number generator for noise generation */
+    srand((unsigned int)time(NULL));
     
     /* Initialize hash/signature */
     strncpy(core->hash_vivo.assinatura, "RAFCODE-Φ-∆RafaelVerboΩ-𓂀ΔΦΩ", 
@@ -143,10 +147,12 @@ double rafaelia_phi_ethica_compute(const rafaelia_ethica_t *ethica)
 double rafaelia_phi_ethica_infinite(double amor, double verbo, 
                                    double verdade, double consciencia)
 {
-    if (consciencia <= 0.0) {
-        consciencia = 1.0;
+    /* Use local variable to avoid modifying input */
+    double consciencia_safe = consciencia;
+    if (consciencia_safe <= 0.0) {
+        consciencia_safe = 1.0; /* Default to unity for invalid input */
     }
-    double exponent = (amor + verbo) * (verdade / consciencia);
+    double exponent = (amor + verbo) * (verdade / consciencia_safe);
     return exp(exponent) - 1.0;
 }
 
@@ -206,8 +212,9 @@ double rafaelia_formula_r_corr(void)
 double rafaelia_formula_amor_vivo(double sigma_preservado, double sigma_total,
                                  double phi_ethica)
 {
+    /* Return 0 for invalid input (negative or zero total) */
     if (sigma_total <= 0.0) {
-        return 0.0;
+        return 0.0; /* Could also return NaN to signal error */
     }
     double ratio = sigma_preservado / sigma_total;
     double pi_phi = RAFAELIA_PI * RAFAELIA_PHI;
@@ -287,6 +294,16 @@ double rafaelia_bloco_evaluate(const rafaelia_bloco_t *bloco,
 }
 
 /* Hash and integrity operations */
+
+/*
+ * NOTE: This is a placeholder hash implementation for demonstration.
+ * For production use, this should be replaced with proper SHA3-256 and BLAKE3
+ * implementations to ensure cryptographic security and integrity.
+ * 
+ * Recommended libraries:
+ * - libkeccak or openssl for SHA3-256
+ * - libb2 or official BLAKE3 library
+ */
 void rafaelia_hash_compute(rafaelia_hash_t *hash, const void *data, size_t len)
 {
     /* Simple hash implementation (placeholder for SHA3/BLAKE3) */

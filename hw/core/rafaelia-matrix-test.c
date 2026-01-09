@@ -56,7 +56,10 @@ int t0(void) {
 #ifdef TEST_STANDALONE
 
 /* Minimal C lib usage for standalone test */
+/* These are stubs - intentionally minimal, no actual output */
+/* Test validates logic, not output */
 void w0(char*s) {
+    /* Stub: validates string traversal only */
     char*p=s;
     while(*p){
         p++;
@@ -64,11 +67,13 @@ void w0(char*s) {
 }
 
 void w1(double d) {
+    /* Stub: validates double to int conversion only */
     long i=(long)d;
     if(i<0){i=-i;}
 }
 
 void w2(int i) {
+    /* Stub: validates int operations only */
     if(i<0){i=-i;}
 }
 

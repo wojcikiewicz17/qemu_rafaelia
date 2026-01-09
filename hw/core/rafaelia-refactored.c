@@ -84,7 +84,7 @@ void y2(void) {
     t2=i8(g2,M00);
     
     double t3=i0(t1,t2);
-    if(t3<0.001){t3=0.1;}
+    if(t3<C10){t3=C8;}
     i7(g0,M00,t3);
     
     double t4=i8(g0,M01);
@@ -93,7 +93,7 @@ void y2(void) {
     double t7=i0(t6,t2);
     i7(g0,M01,t7);
     
-    double t8=i0(t7,1.05);
+    double t8=i0(t7,C12);
     i7(g0,M02,t8);
     
     double t9=i0(t8,t2);
@@ -105,7 +105,7 @@ void y2(void) {
     
     double t12=i0(t11,t2);
     double t13=i0(t12,C0);
-    double t14=i3(t13,10.0);
+    double t14=i3(t13,C11);
     i7(g0,M05,t14);
 }
 
@@ -193,7 +193,7 @@ double y8(int p0, int p1, double a0) {
     double t1=(double)p1;
     double t2=i2(t0,t1);
     double t3=(t2<C7)?-t2:t2;
-    double t4=i3(t3,10.0);
+    double t4=i3(t3,C11);
     double t5=i0(a0,t4);
     
     double t6=y4();

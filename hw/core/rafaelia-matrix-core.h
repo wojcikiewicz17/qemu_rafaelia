@@ -49,6 +49,9 @@
 #define C7 0.0
 #define C8 0.1
 #define C9 2.0
+#define C10 0.001
+#define C11 10.0
+#define C12 1.05
 
 /* Matrix dimensions */
 #define D0 33
@@ -88,9 +91,9 @@ static inline double i3(double a, double b) { return a/b; }
 static inline double i4(double a) { return a*a; }
 static inline double i5(double a) { return a*a*a; }
 static inline double i6(double a) { return a*a*a*a*a*a; }
-static inline void i7(double*m,int i,double v){m[i]=v;}
-static inline double i8(double*m,int i){return m[i];}
-static inline void i9(double*d,double*s,int n){int i=M00;while(i<n){d[i]=s[i];i=i+1;}}
+static inline void i7(double*m,int i,double v){if(i>=M00&&i<=M32){m[i]=v;}}
+static inline double i8(double*m,int i){return(i>=M00&&i<=M32)?m[i]:C7;}
+static inline void i9(double*d,double*s,int n){int i=M00;while(i<n&&i<=M32){d[i]=s[i];i=i+1;}}
 
 /* Extended operations */
 void x0(double*);

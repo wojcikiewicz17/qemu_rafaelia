@@ -5,7 +5,8 @@
 #define RAFAELIA_REFACTORED_H
 
 /* Public API - no structs, only functions */
-/* Note: y0/y1 renamed to z0/z1 to avoid conflict with C library Bessel functions */
+/* Note: z0/z1 used instead of y0/y1 to avoid conflict with C library Bessel 
+ * functions when linking with -lm or including math.h */
 
 /* Init/cleanup */
 void z0(void);

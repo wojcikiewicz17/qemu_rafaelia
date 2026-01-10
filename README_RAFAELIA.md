@@ -56,6 +56,11 @@ UserLAnd ←→ [QEMU Rafaelia Hub] ←→ Magisk (Root)
 - **[QEMU_IMPROVEMENTS_README.md](QEMU_IMPROVEMENTS_README.md)** - QEMU process optimizations
 - **[RAFAELIA_IMPLEMENTATION.md](RAFAELIA_IMPLEMENTATION.md)** - RAFAELIA core implementation
 
+### UI/UX Documentation (ISO 9001/8000 Compliant)
+
+- **[docs/UI_UX_INTEGRATION_GUIDELINES.md](docs/UI_UX_INTEGRATION_GUIDELINES.md)** - Android frontend UI/UX standards
+- **[docs/ERROR_HANDLING_PATTERNS.md](docs/ERROR_HANDLING_PATTERNS.md)** - Error handling and recovery patterns
+
 ### Test Results
 
 ```

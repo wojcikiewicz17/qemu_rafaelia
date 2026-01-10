@@ -255,10 +255,14 @@ class StoragePermissionDeniedError(
     settingsIntent = permissionType.settingsIntent
 )
 
+// Required imports:
+// import android.content.Intent
+// import android.provider.Settings
+
 enum class StoragePermissionType(val settingsIntent: Intent) {
-    READ_EXTERNAL(Settings.ACTION_APPLICATION_DETAILS_SETTINGS),
-    WRITE_EXTERNAL(Settings.ACTION_APPLICATION_DETAILS_SETTINGS),
-    MANAGE_EXTERNAL(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+    READ_EXTERNAL(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)),
+    WRITE_EXTERNAL(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)),
+    MANAGE_EXTERNAL(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
 }
 ```
 

@@ -358,20 +358,36 @@ sealed class OperationState {
     data class Error(val error: AppError) : OperationState()
 }
 
-// View binding
+// View binding - complete state handling
 when (state) {
     is OperationState.Idle -> {
         btnStart.isEnabled = true
         btnStart.text = getString(R.string.start_vm)
         progressBar.isVisible = false
+        statusText.text = getString(R.string.status_ready)
     }
     is OperationState.InProgress -> {
         btnStart.isEnabled = false
         btnStart.text = getString(R.string.starting)
         progressBar.isVisible = true
         progressBar.progress = (state.progress?.times(100))?.toInt() ?: 0
+        progressBar.isIndeterminate = state.progress == null
+        statusText.text = state.message
     }
-    // ... handle other states
+    is OperationState.Success -> {
+        btnStart.isEnabled = true
+        btnStart.text = getString(R.string.stop_vm)
+        progressBar.isVisible = false
+        statusText.text = state.message
+        showSuccessSnackbar(state.message)
+    }
+    is OperationState.Error -> {
+        btnStart.isEnabled = true
+        btnStart.text = getString(R.string.start_vm)
+        progressBar.isVisible = false
+        statusText.text = getString(R.string.status_error)
+        showErrorDialog(state.error)
+    }
 }
 ```
 

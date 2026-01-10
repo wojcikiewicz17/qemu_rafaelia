@@ -50,18 +50,18 @@ Complete ultra-low-level refactoring of RAFAELIA core that:
 #include "rafaelia-refactored.h"
 
 int main(void) {
-    y0();  // Initialize
+    z0();  /* Initialize */
     
-    // Run 10 cycles
+    /* Run 10 cycles */
     for (int i = 0; i < 10; i++) {
-        y2();  // Cycle step
+        y2();  /* Cycle step */
     }
     
-    // Get results
-    double psi = y17(M00);    // cycle[0]
-    double sigma = y17(M04);  // cycle[4]
+    /* Get results */
+    double psi = y17(M00);    /* cycle[0] */
+    double sigma = y17(M04);  /* cycle[4] */
     
-    y1();  // Cleanup
+    z1();  /* Cleanup */
     return 0;
 }
 ```
@@ -107,7 +107,8 @@ i0-i9  → Inline operations (no overhead)
 f0-f9  → Deterministic flips (1 flip = N flops)
 r0-r9  → Matrix row operations
 x0-x9  → Extended operations (cycle, ethica, trinity)
-y0-y22 → Public API (no abstractions)
+z0-z1  → Init/cleanup (renamed from y0/y1 to avoid C library conflict)
+y2-y22 → Public API (no abstractions)
 ```
 
 ## Building
@@ -161,10 +162,10 @@ rafaelia_core_cleanup(&core);
 
 ### New (Matrix-Based)
 ```c
-y0();
+z0();
 y2();
 double value = y17(M00);
-y1();
+z1();
 ```
 
 ## Status

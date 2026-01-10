@@ -1,13 +1,15 @@
 /* RAFAELIA REFACTORED HEADER - Matrix-based API */
+/* Baremetal compatible - no C library dependencies */
 
 #ifndef RAFAELIA_REFACTORED_H
 #define RAFAELIA_REFACTORED_H
 
 /* Public API - no structs, only functions */
+/* Note: y0/y1 renamed to z0/z1 to avoid conflict with C library Bessel functions */
 
 /* Init/cleanup */
-void y0(void);
-void y1(void);
+void z0(void);
+void z1(void);
 
 /* Cycle operations */
 void y2(void);

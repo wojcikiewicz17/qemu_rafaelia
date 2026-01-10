@@ -76,7 +76,7 @@ Position  Component       Description
 - Trinity calculations
 - Complex transformations
 
-**Level 4 - Public API (y0-y22)**
+**Level 4 - Public API (z0-z1, y2-y22)**
 - High-level interface
 - State management
 - No abstractions
@@ -95,7 +95,7 @@ Position  Component       Description
    - Extended operations (x0-x9)
 
 3. **rafaelia-refactored.h** (0.9 KB)
-   - Public API declarations (y0-y22)
+   - Public API declarations (z0-z1, y2-y22)
    - No struct types
    - Clean interface
 
@@ -166,13 +166,13 @@ rafaelia_core_cleanup(&core);
 
 #### After (Matrix-Based)
 ```c
-// No struct definition
-// State in global matrix g0[33]
+/* No struct definition */
+/* State in global matrix g0[33] */
 
-y0();            // Init
-y2();            // Cycle step
-double value = y17(M00);  // Get cycle[0]
-y1();            // Cleanup
+z0();            /* Init */
+y2();            /* Cycle step */
+double value = y17(M00);  /* Get cycle[0] */
+z1();            /* Cleanup */
 ```
 
 ### Constants Used
@@ -204,20 +204,20 @@ Instead of named constants, use indices:
 #include "rafaelia-refactored.h"
 
 int main(void) {
-    // Initialize
-    y0();
+    /* Initialize */
+    z0();
     
-    // Run 100 cycles with integration
+    /* Run 100 cycles with integration */
     int n = M00;
     while (n < 100) {
-        y2();  // Cycle step
+        y2();  /* Cycle step */
         
-        // Update retro every cycle
+        /* Update retro every cycle */
         double psi = y17(M00);
         double amor = y19(M00);
         y7(psi, amor);
         
-        // Update metrics every 10 cycles
+        /* Update metrics every 10 cycles */
         if (n % 10 == 0) {
             double phi = y4();
             y22(M00, phi);
@@ -226,22 +226,25 @@ int main(void) {
         n = n + 1;
     }
     
-    // Add and evaluate blocks
+    /* Add and evaluate blocks */
     int b0 = y10(C6, C0, C1, C2);
     double eval = y11(b0);
+    (void)eval;
     
-    // Calculate wisdom
+    /* Calculate wisdom */
     double wisdom = y12();
+    (void)wisdom;
     
-    // Matrix operations
+    /* Matrix operations */
     double m0[D0];
     double m1[D0];
-    y15(m0);  // Generate spiral
+    y15(m0);  /* Generate spiral */
     y15(m1);
     double corr = y14(m0, m1);
+    (void)corr;
     
-    // Cleanup
-    y1();
+    /* Cleanup */
+    z1();
     
     return M00;
 }
@@ -302,7 +305,7 @@ Every operation is:
 
 ✅ No C includes in core (only in test files)
 ✅ Everything in matrices (g0[33], g4[1024])
-✅ Deterministic functions (f0-f9, r0-r9, x0-x9, y0-y22)
+✅ Deterministic functions (f0-f9, r0-r9, x0-x9, z0-z1, y2-y22)
 ✅ One flip resolves N flops (inline operations)
 ✅ No abstractions (no structs, only arrays)
 ✅ No named variables in operations (use M00-M32, C0-C9)

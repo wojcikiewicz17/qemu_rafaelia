@@ -1,5 +1,6 @@
 /* RAFAELIA CORE REFACTORED - Matrix-based, no abstractions */
 /* All state in matrices, deterministic operations only */
+/* Baremetal compatible - no C library dependencies beyond basic math */
 
 #include "rafaelia-matrix-core.h"
 #include "rafaelia-refactored.h"
@@ -20,14 +21,13 @@ static double g0[D0];
 /* Temp matrices */
 static double g1[D0];
 static double g2[D0];
-static double g3[D1];
 
 /* Block storage - flat matrix */
 static double g4[D3];
 static int g5=M00;
 
 /* Init all state */
-void y0(void) {
+void z0(void) {
     r7(g0);
     r7(g1);
     r7(g2);
@@ -65,7 +65,7 @@ void y0(void) {
 }
 
 /* Cleanup */
-void y1(void) {
+void z1(void) {
     g5=M00;
 }
 

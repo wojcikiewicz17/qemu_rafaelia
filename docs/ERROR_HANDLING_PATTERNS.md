@@ -240,6 +240,13 @@ enum class CorruptionType(val description: String) {
 2. Select different storage location
 
 **Implementation**:
+
+> **Required Imports**:
+> ```kotlin
+> import android.content.Intent
+> import android.provider.Settings
+> ```
+
 ```kotlin
 class StoragePermissionDeniedError(
     val permissionType: StoragePermissionType
@@ -254,10 +261,6 @@ class StoragePermissionDeniedError(
     ),
     settingsIntent = permissionType.settingsIntent
 )
-
-// Required imports:
-// import android.content.Intent
-// import android.provider.Settings
 
 enum class StoragePermissionType(val settingsIntent: Intent) {
     READ_EXTERNAL(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)),

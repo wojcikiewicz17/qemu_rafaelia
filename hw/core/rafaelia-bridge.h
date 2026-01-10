@@ -1,4 +1,5 @@
 /* RAFAELIA BRIDGE - Compatibility layer between old and new APIs */
+/* Baremetal compatible bridge */
 
 #ifndef RAFAELIA_BRIDGE_H
 #define RAFAELIA_BRIDGE_H
@@ -11,7 +12,7 @@
 
 /* Initialize core using new matrix system */
 static inline void rafaelia_core_init_bridge(rafaelia_core_t *core) {
-    y0();  /* Initialize matrix core */
+    z0();  /* Initialize matrix core */
     
     /* Sync struct with matrix state */
     core->cycle.psi = y17(M00);
@@ -36,7 +37,7 @@ static inline void rafaelia_core_init_bridge(rafaelia_core_t *core) {
 
 /* Cleanup using new matrix system */
 static inline void rafaelia_core_cleanup_bridge(rafaelia_core_t *core) {
-    y1();  /* Cleanup matrix core */
+    z1();  /* Cleanup matrix core */
     core->bloco_count = 0;
     if (core->blocos) {
         core->blocos = 0;  /* Matrix core manages storage */

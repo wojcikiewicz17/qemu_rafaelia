@@ -53,7 +53,8 @@ Single-flip deterministic operations:
 **f0-f9**: Deterministic flip operations resolving N flops
 **r0-r9**: Matrix row operations
 **x0-x9**: Extended matrix operations (cycle, ethica, trinity, etc.)
-**y0-y22**: High-level API without abstractions
+**z0-z1**: Init/cleanup (renamed from y0/y1 to avoid C library conflict)
+**y2-y22**: High-level API without abstractions
 
 ## Key Features
 
@@ -123,15 +124,15 @@ r6(m0, m1, m2); // Element-wise multiply
 ### Initialization
 
 ```c
-void y0(void);  // Initialize all state
-void y1(void);  // Cleanup
+void z0(void);  /* Initialize all state */
+void z1(void);  /* Cleanup */
 ```
 
 ### Cycle Operations (ψχρΔΣΩ)
 
 ```c
-void y2(void);    // Execute one cycle step
-double y3(void);  // Measure cycle state
+void y2(void);    /* Execute one cycle step */
+double y3(void);  /* Measure cycle state */
 ```
 
 ### Ethical Filter (Φ_ethica)
@@ -203,31 +204,36 @@ void y22(int index, double val); // Set
 ### Basic Cycle
 
 ```c
-y0();  // Init
+z0();  /* Init */
 
 for (int i = M00; i < 10; i++) {
-    y2();  // Step cycle
+    y2();  /* Step cycle */
 }
 
 double psi = y17(M00);
 double sigma = y17(M04);
 double omega = y17(M05);
+(void)psi;
+(void)sigma;
+(void)omega;
 
-y1();  // Cleanup
+z1();  /* Cleanup */
 ```
 
 ### Block Processing
 
 ```c
-y0();
+z0();
 
-int b0 = y10(C6, C6, C6, C6);  // Add block
+int b0 = y10(C6, C6, C6, C6);  /* Add block */
 int b1 = y10(C0, C1, C2, C3);
 
-double eval0 = y11(b0);  // Evaluate
+double eval0 = y11(b0);  /* Evaluate */
 double eval1 = y11(b1);
+(void)eval0;
+(void)eval1;
 
-y1();
+z1();
 ```
 
 ### Matrix Operations

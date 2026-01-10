@@ -1,4 +1,5 @@
 /* RAFAELIA MATRIX CORE TEST - Deterministic validation */
+/* Baremetal compatible test */
 
 #include "rafaelia-matrix-core.h"
 
@@ -11,8 +12,6 @@ int t0(void) {
     double m0[D0];
     double m1[D0];
     double m2[D0];
-    double m3[D1];
-    double m4[D1];
     
     r7(m0);
     r8(m1);

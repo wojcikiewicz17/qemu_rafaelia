@@ -27,9 +27,9 @@ double value = cycle.psi;
 // State in global matrix g0[33]
 // Positions: [0]=psi, [1]=chi, [2]=rho, [3]=delta, [4]=sigma, [5]=omega
 
-y0();  // Initialize
-y18(M00, 1.0);  // Set cycle[0] = psi
-double value = y17(M00);  // Get cycle[0]
+z0();  /* Initialize */
+y18(M00, 1.0);  /* Set cycle[0] = psi */
+double value = y17(M00);  /* Get cycle[0] */
 ```
 
 ## Component Mapping
@@ -176,21 +176,22 @@ void process() {
 #include "rafaelia-matrix-core.h"
 #include "rafaelia-refactored.h"
 
-void process() {
-    y0();  // Initialize
+void process(void) {
+    z0();  /* Initialize */
     
-    // Run 10 cycles
+    /* Run 10 cycles */
     for (int i = M00; i < 10; i++) {
-        y2();  // Cycle step
+        y2();  /* Cycle step */
     }
     
-    // Add a block
-    int block_id = y10(C6, C6, C6, C6);  // C6 = 1.0
+    /* Add a block */
+    int block_id = y10(C6, C6, C6, C6);  /* C6 = 1.0 */
     
-    // Evaluate
+    /* Evaluate */
     double eval = y11(block_id);
+    (void)eval;
     
-    y1();  // Cleanup
+    z1();  /* Cleanup */
 }
 ```
 
@@ -256,10 +257,12 @@ The new system is designed for:
 
 The old API (rafaelia-core.h) can coexist with the new API. For migration:
 
-1. Start with new code using y0-y22 functions
+1. Start with new code using z0/z1 for init/cleanup, y2-y22 for operations
 2. Keep old code using rafaelia_* functions if needed
 3. Gradually migrate modules one at a time
 4. Both systems can run in parallel during transition
+
+Note: `z0()` and `z1()` are used instead of `y0()` and `y1()` to avoid conflicts with C library Bessel functions.
 
 ## Testing
 

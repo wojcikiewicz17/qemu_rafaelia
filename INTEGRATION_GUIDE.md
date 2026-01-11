@@ -455,6 +455,38 @@ Perf = (Throughput × Quality) / (Latency × Resources)
 4. **Neural Network Operations**: Direct neural network execution
 5. **Blockchain Integration**: Distributed ledger for audit trails
 
+## UI/UX Integration for Android Frontend
+
+For Android applications integrating with QEMU Rafaelia, comprehensive UI/UX guidelines following ISO 9001 and ISO 8000 standards are available:
+
+### Documentation
+
+- **[UI/UX Integration Guidelines](docs/UI_UX_INTEGRATION_GUIDELINES.md)** - Complete UI/UX standards including:
+  - Navigation clarity patterns
+  - Permission and storage UX for Android 13-15
+  - Long operation feedback patterns
+  - Accessibility standards (WCAG 2.1 AA)
+  - Quality assurance checklists
+
+- **[Error Handling Patterns](docs/ERROR_HANDLING_PATTERNS.md)** - Standardized error handling including:
+  - Error code structure and categories
+  - User-friendly error messages
+  - Recovery action patterns
+  - Error dialog implementations
+
+### Key Principles
+
+1. **Predictability**: Users always know what to expect
+2. **Stability**: Operations complete reliably without crashes
+3. **Honesty**: Clear communication about limitations and errors
+4. **Technical Respect**: Designed for power users who understand virtualization
+
+### Quality Standards
+
+- ISO 9001:2015 - Quality Management Systems
+- ISO 8000 - Data Quality
+- WCAG 2.1 AA - Accessibility
+
 ## Conclusion
 
 The RAFAELIA multi-repository integration system provides a powerful, ethical, and adaptive framework for orchestrating operations across multiple codebases. By following the principles of Amor, Coerência, Verdade, and Consciência, the system achieves Diamond State excellence.

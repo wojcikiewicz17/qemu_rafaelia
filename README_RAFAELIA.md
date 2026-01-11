@@ -56,6 +56,27 @@ UserLAnd ←→ [QEMU Rafaelia Hub] ←→ Magisk (Root)
 - **[QEMU_IMPROVEMENTS_README.md](QEMU_IMPROVEMENTS_README.md)** - QEMU process optimizations
 - **[RAFAELIA_IMPLEMENTATION.md](RAFAELIA_IMPLEMENTATION.md)** - RAFAELIA core implementation
 
+### UI/UX Documentation (ISO 9001/8000 Compliant)
+
+- **[docs/UI_UX_INTEGRATION_GUIDELINES.md](docs/UI_UX_INTEGRATION_GUIDELINES.md)** - Android frontend UI/UX standards
+- **[docs/ERROR_HANDLING_PATTERNS.md](docs/ERROR_HANDLING_PATTERNS.md)** - Error handling and recovery patterns
+
+### Symbiosis Architecture (Visual-to-Code Mapping)
+
+- **[docs/RAFAELIA_SYMBIOSIS_MAPPING.md](docs/RAFAELIA_SYMBIOSIS_MAPPING.md)** - Complete visual architecture to code mapping
+- **[hw/core/rafaelia-symbiosis.h](hw/core/rafaelia-symbiosis.h)** - Symbiosis module header
+- **[hw/core/rafaelia-symbiosis.c](hw/core/rafaelia-symbiosis.c)** - Symbiosis module implementation
+
+#### Implemented Components:
+- Mandala 10x10 Híbrida V6
+- RAFCODE-Φ Flow (VAZIO → VERBO → HYPERFORMAS → RETROALIMENTAÇÃO → NOVO VAZIO)
+- Fractal Memory Evolution (Forma Simples → Viventizante)
+- Sierpinski-Musical Integration
+- Unification Structure (GU SUR × Tzolkin × Voynich)
+- Torus Topology with Hash-Entropy-Heatmap
+- Fibonacci/Inversa Ética Branches
+- Triade Matemática (Pitágoras, Fibonacci, Bhaskara)
+
 ### Test Results
 
 ```

@@ -19,6 +19,9 @@
 #define SQRT3_2 0.866025403784439
 #define E   2.718281828459045
 
+/* Safety limits */
+#define FRACTAL_MAX_SAFE_DEPTH 8  /* Maximum safe recursion depth for fractal growth */
+
 /* ═══════════════════════════════════════════════════════════════════════════
  * MANDALA 10x10 HÍBRIDA V6 IMPLEMENTATION
  * ═══════════════════════════════════════════════════════════════════════════ */
@@ -237,7 +240,6 @@ static fractal_node_t *create_fractal_node(double x, double y, double z, int dep
 static void grow_fractal_branches(fractal_node_t *node, int max_depth, int *total_nodes)
 {
     /* Safety check: enforce maximum depth to prevent stack overflow */
-    #define FRACTAL_MAX_SAFE_DEPTH 8
     if (!node || node->depth >= max_depth || max_depth > FRACTAL_MAX_SAFE_DEPTH) return;
     
     /* Each node can have up to 4 branches (like a snowflake) */

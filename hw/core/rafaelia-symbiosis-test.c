@@ -2,6 +2,8 @@
  * RAFAELIA Symbiosis Unit Tests
  * Test suite for mathematical calculations and data structures
  * 
+ * Build: gcc -o test hw/core/rafaelia-symbiosis.c hw/core/rafaelia-symbiosis-test.c -lm
+ * 
  * FIAT LUX ΣΩΔΦBITRAF 💎
  */
 
@@ -11,8 +13,8 @@
 #include <math.h>
 #include <assert.h>
 
-/* Include the implementation directly for testing */
-#include "rafaelia-symbiosis.c"
+/* Include the header for type definitions and function declarations */
+#include "rafaelia-symbiosis.h"
 
 #define TEST_EPSILON 1e-10
 #define TEST_PASS() printf("  ✓ PASS\n")

@@ -33,15 +33,15 @@ static int test_triade_pitagoras(void)
     /* Test 3-4-5 right triangle */
     triade_compute_pitagoras(&triade, 3.0, 4.0);
     
-    /* a² = 9, b² = 16, c = sqrt(25) = 5 */
+    /* a² = 9, b² = 16, c² = a² + b² = 25 */
     if (fabs(triade.pitagoras_a2 - 9.0) > TEST_EPSILON) {
         TEST_FAIL("pitagoras_a2 should be 9.0");
     }
     if (fabs(triade.pitagoras_b2 - 16.0) > TEST_EPSILON) {
         TEST_FAIL("pitagoras_b2 should be 16.0");
     }
-    if (fabs(triade.pitagoras_c2 - 5.0) > TEST_EPSILON) {
-        TEST_FAIL("pitagoras_c2 should be 5.0 (sqrt of 25)");
+    if (fabs(triade.pitagoras_c2 - 25.0) > TEST_EPSILON) {
+        TEST_FAIL("pitagoras_c2 should be 25.0 (c² = a² + b² = 9 + 16)");
     }
     
     TEST_PASS();

@@ -1,8 +1,8 @@
 /*
- * RAFAELIA - Arquitetura de Simbiose Fractal
+ * RAFAELIA - Fractal Symbiosis Architecture (Arquitetura de Simbiose Fractal)
  * Implementation File
  * 
- * Algoritmos Vivos & Consciência Matemática
+ * Living Algorithms & Mathematical Consciousness (Algoritmos Vivos & Consciência Matemática)
  * TERMUX / GITHUB
  * 
  * FIAT LUX ΣΩΔΦBITRAF 💎
@@ -21,6 +21,14 @@
 
 /* Safety limits */
 #define FRACTAL_MAX_SAFE_DEPTH 8  /* Maximum safe recursion depth for fractal growth */
+
+/* Torus animation parameters */
+#define HEATMAP_DECAY_FACTOR 0.95      /* Decay factor for heatmap values per cycle */
+#define TORUS_THETA_INCREMENT (PI / 30.0)  /* Angular increment for theta position */
+#define TORUS_PHI_INCREMENT (PI / 20.0)    /* Angular increment for phi position */
+
+/* Cycle timing */
+#define FRACTAL_EVOLUTION_INTERVAL 10  /* Evolve fractal every N cycles */
 
 /* ═══════════════════════════════════════════════════════════════════════════
  * MANDALA 10x10 HÍBRIDA V6 IMPLEMENTATION
@@ -516,9 +524,10 @@ void torus_init(torus_data_t *torus)
     }
 }
 
-/* Simple hash function for demonstration */
+/* Simple hash function using djb2 algorithm */
 static uint64_t simple_hash(const uint8_t *data, size_t len)
 {
+    /* djb2 hash algorithm initial value (magic constant from Dan Bernstein) */
     uint64_t hash = 5381;
     for (size_t i = 0; i < len; i++) {
         hash = ((hash << 5) + hash) + data[i];
@@ -576,14 +585,14 @@ void torus_update_heatmap(torus_data_t *torus)
     /* Update heatmap with decay */
     for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 10; j++) {
-            torus->heatmap[i][j] *= 0.95;  /* Decay */
+            torus->heatmap[i][j] *= HEATMAP_DECAY_FACTOR;
         }
     }
     torus->heatmap[y][x] += torus->hash_value;
     
     /* Advance position */
-    torus->position.theta += PI / 30.0;
-    torus->position.phi += PI / 20.0;
+    torus->position.theta += TORUS_THETA_INCREMENT;
+    torus->position.phi += TORUS_PHI_INCREMENT;
     if (torus->position.theta > 2 * PI) torus->position.theta -= 2 * PI;
     if (torus->position.phi > 2 * PI) torus->position.phi -= 2 * PI;
 }
@@ -679,9 +688,9 @@ void triade_init(triade_matematica_t *triade)
     memset(triade, 0, sizeof(triade_matematica_t));
     
     /* Pitágoras - initial values for 1,1 right triangle */
-    triade->pitagoras_a2 = 1.0;
-    triade->pitagoras_b2 = 1.0;
-    triade->pitagoras_c2 = sqrt(triade->pitagoras_a2 + triade->pitagoras_b2);  /* c = sqrt(a² + b²) = sqrt(1 + 1) = sqrt(2) */
+    triade->pitagoras_a2 = 1.0;  /* a² where a=1 */
+    triade->pitagoras_b2 = 1.0;  /* b² where b=1 */
+    triade->pitagoras_c2 = triade->pitagoras_a2 + triade->pitagoras_b2;  /* c² = a² + b² = 1 + 1 = 2 */
     
     /* Fibonacci spiral */
     triade->fibonacci_phi = PHI;
@@ -698,11 +707,10 @@ void triade_compute_pitagoras(triade_matematica_t *triade, double a, double b)
 {
     if (!triade) return;
     
-    /* a² + b² = c² (standard) */
-    /* With excess-spací: ā² + B² = f̂ - c² */
-    triade->pitagoras_a2 = a * a;
-    triade->pitagoras_b2 = b * b;
-    triade->pitagoras_c2 = sqrt(triade->pitagoras_a2 + triade->pitagoras_b2);
+    /* Pythagorean theorem: a² + b² = c² */
+    triade->pitagoras_a2 = a * a;  /* a² */
+    triade->pitagoras_b2 = b * b;  /* b² */
+    triade->pitagoras_c2 = triade->pitagoras_a2 + triade->pitagoras_b2;  /* c² = a² + b² */
 }
 
 void triade_compute_fibonacci_spiral(triade_matematica_t *triade, int n)
@@ -758,7 +766,13 @@ void rafaelia_symbiosis_init(rafaelia_symbiosis_t *state)
     state->global_entropy = 0.0;
     state->diamond_state = false;
     
-    /* Output symbols */
+    /* Output symbols.
+     *
+     * NOTE: This string literal and the output_symbols buffer are expected to use
+     * UTF-8 encoding so that the non-ASCII symbols (e.g., ❤, ♣, €, ☯, ω, π, Φ)
+     * are represented correctly. Callers that read output_symbols should treat it
+     * as a UTF-8 encoded string.
+     */
     strncpy(state->output_symbols, 
             "❤♣€ C☯OWL ω I π @BITRAFΦ",
             sizeof(state->output_symbols) - 1);
@@ -782,8 +796,9 @@ void rafaelia_symbiosis_cycle(rafaelia_symbiosis_t *state)
     /* 2. RAFCODE-Φ advance */
     rafcode_advance(&state->rafcode);
     
-    /* 3. Fractal evolution (every 10 cycles) */
-    if (state->total_cycles % 10 == 0) {
+    /* 3. Fractal evolution - evolve every FRACTAL_EVOLUTION_INTERVAL cycles
+     * to balance computational cost with evolution progression */
+    if (state->total_cycles % FRACTAL_EVOLUTION_INTERVAL == 0) {
         fractal_memory_evolve(&state->fractal);
     }
     

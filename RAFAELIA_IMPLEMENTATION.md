@@ -1,5 +1,16 @@
 # RAFAELIA Core Implementation Summary
 
+> **📖 This document is part of the QEMU RAFAELIA Technical Documentation**
+> 
+> See also: [📖 Complete Technical Documentation](docs/RAFAELIA_TECHNICAL_DOCUMENTATION.md) | Chapter 4: Mathematical Framework
+> 
+> **Related Documents:**
+> - → [hw/core/RAFAELIA_README.md](hw/core/RAFAELIA_README.md) - Core API reference
+> - → [hw/core/MATRIX_REFACTORING.md](hw/core/MATRIX_REFACTORING.md) - Matrix core architecture
+> - → [README_RAFAELIA.md](README_RAFAELIA.md) - Main project README
+
+---
+
 ## Implementation Overview
 
 This implementation adds the RAFAELIA_BOOTBLOCK_v1 low-level core system to QEMU, providing direct, non-abstracted access to the RAFAELIA mathematical and philosophical framework.

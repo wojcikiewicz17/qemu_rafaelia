@@ -1,5 +1,16 @@
 # RAFAELIA Multi-Repository Integration Architecture
 
+> **📖 This document is part of the QEMU RAFAELIA Technical Documentation**
+> 
+> See also: [📖 Complete Technical Documentation](docs/RAFAELIA_TECHNICAL_DOCUMENTATION.md) | Chapter 2: System Architecture
+> 
+> **Related Documents:**
+> - → [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md) - Usage guide and API reference
+> - → [INTEGRATION_SUMMARY.md](INTEGRATION_SUMMARY.md) - Implementation details and metrics
+> - → [README_RAFAELIA.md](README_RAFAELIA.md) - Main project README
+
+---
+
 ## Executive Summary
 
 This document defines the strategic architecture for integrating QEMU Rafaelia with four external repositories to create a unified, diamond-level excellence system.

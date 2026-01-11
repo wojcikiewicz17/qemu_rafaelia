@@ -1,5 +1,16 @@
 # RAFAELIA Matrix Core - Ultra Low-Level Implementation
 
+> **📖 This document is part of the QEMU RAFAELIA Technical Documentation**
+> 
+> See also: [📖 Complete Technical Documentation](../../docs/RAFAELIA_TECHNICAL_DOCUMENTATION.md) | Chapter 4.5: Matrix Core
+> 
+> **Related Documents:**
+> - → [MATRIX_REFACTORING.md](MATRIX_REFACTORING.md) - Architecture reference
+> - → [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) - Implementation summary
+> - → [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) - Migration instructions
+
+---
+
 ## Quick Start
 
 ```bash

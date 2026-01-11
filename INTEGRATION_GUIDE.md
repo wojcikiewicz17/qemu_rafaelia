@@ -1,5 +1,16 @@
 # RAFAELIA Multi-Repository Integration Guide
 
+> **📖 This document is part of the QEMU RAFAELIA Technical Documentation**
+> 
+> See also: [📖 Complete Technical Documentation](docs/RAFAELIA_TECHNICAL_DOCUMENTATION.md) | Chapter 7: API Reference
+> 
+> **Related Documents:**
+> - → [INTEGRATION_ARCHITECTURE.md](INTEGRATION_ARCHITECTURE.md) - Strategic design and architecture
+> - → [INTEGRATION_SUMMARY.md](INTEGRATION_SUMMARY.md) - Implementation details and metrics
+> - → [README_RAFAELIA.md](README_RAFAELIA.md) - Main project README
+
+---
+
 ## Overview
 
 This guide explains how to use the RAFAELIA multi-repository integration system to connect and orchestrate operations across QEMU Rafaelia, UserLAnd, Magisk_Rafaelia, llamaRafaelia, and Rafaelia_Private.

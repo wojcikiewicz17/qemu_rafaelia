@@ -1,5 +1,17 @@
 # RAFAELIA Ultra Low-Level Refactoring - Complete Summary
 
+> **📖 This document is part of the QEMU RAFAELIA Technical Documentation**
+> 
+> See also: [📖 Complete Technical Documentation](../../docs/RAFAELIA_TECHNICAL_DOCUMENTATION.md) | Chapter 4.5: Matrix Core
+> 
+> **Related Documents:**
+> - → [RAFAELIA_README.md](RAFAELIA_README.md) - Core API reference
+> - → [MATRIX_REFACTORING.md](MATRIX_REFACTORING.md) - Architecture reference
+> - → [README_MATRIX.md](README_MATRIX.md) - Quick start guide
+> - → [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) - Migration instructions
+
+---
+
 ## Executive Summary
 
 Complete refactoring of RAFAELIA core to ultra-low-level matrix-based implementation eliminating all abstractions and using only deterministic matrix operations.

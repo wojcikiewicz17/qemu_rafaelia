@@ -665,15 +665,14 @@ void fibonacci_etica_cleanup(fibonacci_etica_t *state)
      * Note: In the current implementation, fibonacci_etica_t does not own any
      * dynamically allocated branch_node_t trees. If future changes allocate
      * memory for root_fibonacci or root_inversa, this function should be
+
+    /*
+     * Note: In the current implementation, fibonacci_etica_t does not own any
+     * dynamically allocated branch_node_t trees. If future changes allocate
+     * memory for root_fibonacci or root_inversa, this function should be
      * extended to perform the appropriate recursive deallocation of those
      * structures.
      */
-    if (state->root_fibonacci) {
-        state->root_fibonacci = NULL;
-    }
-    if (state->root_inversa) {
-        state->root_inversa = NULL;
-    }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

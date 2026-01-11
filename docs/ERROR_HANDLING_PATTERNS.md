@@ -241,13 +241,11 @@ enum class CorruptionType(val description: String) {
 
 **Implementation**:
 
-> **Required Imports**:
-> ```kotlin
-> import android.content.Intent
-> import android.provider.Settings
-> ```
-
 ```kotlin
+// Required imports for this example
+import android.content.Intent
+import android.provider.Settings
+
 class StoragePermissionDeniedError(
     val permissionType: StoragePermissionType
 ) : QemuError(
@@ -705,6 +703,7 @@ object ErrorLogger {
     
     <!-- Error Messages -->
     <string name="error_qemu_binary_not_found">The virtualization engine is not properly installed. Please reinstall the application or contact support.</string>
+    <!-- %1$d = requestedMb (Long, in MB), %2$d = availableMb (Long, in MB) -->
     <string name="error_out_of_memory">Not enough memory available to start this virtual machine.\n\nRequested: %1$d MB\nAvailable: %2$d MB</string>
     <string name="error_storage_permission_denied">Storage access permission is required to manage virtual machine files.</string>
     <string name="error_disk_corrupted">The virtual disk file is corrupted and cannot be opened.\n\n⚠️ Data recovery may not be possible.</string>

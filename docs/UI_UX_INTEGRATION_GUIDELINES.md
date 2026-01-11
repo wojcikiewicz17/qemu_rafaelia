@@ -39,37 +39,39 @@ The application should feel:
 
 ## Quality Management Principles (ISO 9001)
 
-### 7.1 Customer Focus
+> **Note**: These principles are based on the ISO 9001:2015 quality management principles described in Clause 0.2 of the standard's introduction.
+
+### Principle 1: Customer Focus
 - Understand user needs for VM creation, configuration, and management
 - Provide clear feedback on all operations
 - Document all limitations upfront
 
-### 7.2 Leadership
+### Principle 2: Leadership
 - Establish clear UI hierarchies and navigation flows
 - Define consistent design patterns across all screens
 
-### 7.3 Engagement of People
+### Principle 3: Engagement of People
 - Design for both novice and expert users
 - Provide contextual help and documentation links
 
-### 7.4 Process Approach
+### Principle 4: Process Approach
 - Define clear workflows for:
   - VM Creation (Step 1 → Step N)
   - VM Configuration
   - VM Execution
   - Error Recovery
 
-### 7.5 Improvement
+### Principle 5: Improvement
 - Collect user feedback on UX issues
 - Track error occurrences and resolution rates
 - Implement continuous improvement cycles
 
-### 7.6 Evidence-Based Decision Making
+### Principle 6: Evidence-Based Decision Making
 - Log all operations for debugging
 - Track user journey analytics (with consent)
 - Monitor crash rates and ANRs
 
-### 7.7 Relationship Management
+### Principle 7: Relationship Management
 - Clear communication with users about updates
 - Transparent changelog for improvements
 

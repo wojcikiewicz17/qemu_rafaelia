@@ -224,9 +224,21 @@ static fractal_node_t *create_fractal_node(double x, double y, double z, int dep
     return node;
 }
 
+/*
+ * Recursively grow fractal branches from a node.
+ * 
+ * WARNING: This function uses recursion which could lead to stack overflow
+ * if max_depth is set too high. The maximum safe depth is approximately 8
+ * (with up to 4 branches per node). Current usage limits max_depth to 5.
+ * 
+ * Call stack depth = max_depth * branches_per_node (up to 8).
+ * For max_depth=5 and 4 branches: worst case ~20 stack frames.
+ */
 static void grow_fractal_branches(fractal_node_t *node, int max_depth, int *total_nodes)
 {
-    if (!node || node->depth >= max_depth) return;
+    /* Safety check: enforce maximum depth to prevent stack overflow */
+    #define FRACTAL_MAX_SAFE_DEPTH 8
+    if (!node || node->depth >= max_depth || max_depth > FRACTAL_MAX_SAFE_DEPTH) return;
     
     /* Each node can have up to 4 branches (like a snowflake) */
     int branches = (max_depth - node->depth > 2) ? 4 : 2;
@@ -638,9 +650,14 @@ void fibonacci_etica_cleanup(fibonacci_etica_t *state)
 {
     if (!state) return;
     
-    /* Free branch trees if allocated */
+    /*
+     * Note: In the current implementation, fibonacci_etica_t does not own any
+     * dynamically allocated branch_node_t trees. If future changes allocate
+     * memory for root_fibonacci or root_inversa, this function should be
+     * extended to perform the appropriate recursive deallocation of those
+     * structures.
+     */
     if (state->root_fibonacci) {
-        /* Recursive cleanup would go here */
         state->root_fibonacci = NULL;
     }
     if (state->root_inversa) {
@@ -662,7 +679,7 @@ void triade_init(triade_matematica_t *triade)
     /* Pitágoras - initial values for 1,1 right triangle */
     triade->pitagoras_a2 = 1.0;
     triade->pitagoras_b2 = 1.0;
-    triade->pitagoras_c2 = sqrt(2.0);  /* c = sqrt(a² + b²) = sqrt(1 + 1) = sqrt(2) */
+    triade->pitagoras_c2 = sqrt(triade->pitagoras_a2 + triade->pitagoras_b2);  /* c = sqrt(a² + b²) = sqrt(1 + 1) = sqrt(2) */
     
     /* Fibonacci spiral */
     triade->fibonacci_phi = PHI;
@@ -776,9 +793,14 @@ void rafaelia_symbiosis_cycle(rafaelia_symbiosis_t *state)
     unification_advance_tzolkin(&state->unification);
     unification_compute_psi_total(&state->unification);
     
-    /* 6. Torus update with current state as data (sample first 64 bytes) */
-    size_t sample_size = sizeof(*state) < 64 ? sizeof(*state) : 64;
-    torus_compute_hash_entropy(&state->torus, state, sample_size);
+    /* 6. Torus update - sample only scalar coherence fields to avoid hashing pointers */
+    double coherence_sample[4] = {
+        state->mandala.coherence,
+        state->fractal.memory_coherence,
+        state->unification.psi_total,
+        state->global_coherence
+    };
+    torus_compute_hash_entropy(&state->torus, coherence_sample, sizeof(coherence_sample));
     torus_update_heatmap(&state->torus);
     
     /* 7. Triade computation */

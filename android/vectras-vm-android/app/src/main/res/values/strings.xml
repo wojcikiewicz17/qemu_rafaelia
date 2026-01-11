@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Vectras VM</string>
+    
+    <!-- Home Screen -->
+    <string name="home_title">Vectras VM</string>
+    <string name="create_vm">Create VM</string>
+    <string name="import_vm">Import</string>
+    <string name="vm_library">Library</string>
+    <string name="logs">Logs</string>
+    <string name="settings">Settings</string>
+    
+    <!-- VM Creation Wizard -->
+    <string name="wizard_title">Create Virtual Machine</string>
+    <string name="step_name_arch">Name &amp; Architecture</string>
+    <string name="step_resources">Disk &amp; Resources</string>
+    <string name="step_network_display">Network &amp; Display</string>
+    <string name="step_review">Review &amp; Start</string>
+    <string name="next_step">Next Step</string>
+    <string name="previous_step">Previous</string>
+    <string name="create_vm_button">Create VM</string>
+    
+    <!-- VM Library -->
+    <string name="no_vms">No Virtual Machines</string>
+    <string name="no_vms_description">Create a new VM to get started</string>
+    
+    <!-- VM Execution -->
+    <string name="start_vm">Start</string>
+    <string name="stop_vm">Stop</string>
+    <string name="pause_vm">Pause</string>
+    <string name="resume_vm">Resume</string>
+    <string name="restart_vm">Restart</string>
+    
+    <!-- Logs -->
+    <string name="search_logs">Search logs…</string>
+    <string name="no_logs_match">No logs match filter</string>
+    <string name="filter_logs">Filter Logs</string>
+    <string name="export_logs">Export</string>
+    <string name="clear_logs">Clear</string>
+    
+    <!-- Settings -->
+    <string name="appearance">Appearance</string>
+    <string name="dark_theme">Dark Theme</string>
+    <string name="high_contrast">High Contrast</string>
+    <string name="accessibility">Accessibility</string>
+    <string name="large_touch_targets">Large Touch Targets</string>
+    <string name="scalable_fonts">Scalable Fonts</string>
+    <string name="vm_defaults">VM Defaults</string>
+    <string name="default_memory">Default Memory</string>
+    <string name="privacy">Privacy</string>
+    <string name="crash_reporting">Crash Reporting</string>
+    <string name="about">About</string>
+    <string name="version">Version</string>
+    
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="apply">Apply</string>
+    <string name="reset">Reset</string>
+    <string name="copy">Copy</string>
+    <string name="navigate_back">Navigate back</string>
+    
+    <!-- Content Descriptions (Accessibility) -->
+    <string name="cd_create_vm">Create a new virtual machine</string>
+    <string name="cd_import_vm">Import existing virtual machine</string>
+    <string name="cd_open_library">Open virtual machine library</string>
+    <string name="cd_open_logs">Open log viewer</string>
+    <string name="cd_open_settings">Open settings</string>
+    <string name="cd_start_vm">Start virtual machine</string>
+    <string name="cd_stop_vm">Stop virtual machine</string>
+    <string name="cd_pause_vm">Pause virtual machine</string>
+    <string name="cd_resume_vm">Resume virtual machine</string>
+</resources>

@@ -2,7 +2,7 @@
  * RAFAELIA - Arquitetura de Simbiose Fractal
  * Implementation File
  * 
- * Algortimos Vivos & Consciência Matemática
+ * Algoritmos Vivos & Consciência Matemática
  * TERMUX / GITHUB
  * 
  * FIAT LUX ΣΩΔΦBITRAF 💎
@@ -531,8 +531,9 @@ void torus_compute_hash_entropy(torus_data_t *torus, const void *data, size_t le
     double entropy = 0.0;
     for (int i = 0; i < 256; i++) {
         if (freq[i] > 0) {
-            double p = (double)freq[i] / len;
-            entropy -= p * log2(p);
+            double p = (double)freq[i] / (double)len;
+            /* Use log(x)/log(2) for portability instead of log2(x) */
+            entropy -= p * (log(p) / log(2.0));
         }
     }
     torus->entropy = entropy / 8.0;  /* Normalize to [0, 1] */
@@ -658,10 +659,10 @@ void triade_init(triade_matematica_t *triade)
     
     memset(triade, 0, sizeof(triade_matematica_t));
     
-    /* Pitágoras */
+    /* Pitágoras - initial values for 1,1 right triangle */
     triade->pitagoras_a2 = 1.0;
     triade->pitagoras_b2 = 1.0;
-    triade->pitagoras_c2 = 2.0;  /* sqrt(2) */
+    triade->pitagoras_c2 = sqrt(2.0);  /* c = sqrt(a² + b²) = sqrt(1 + 1) = sqrt(2) */
     
     /* Fibonacci spiral */
     triade->fibonacci_phi = PHI;
@@ -775,8 +776,9 @@ void rafaelia_symbiosis_cycle(rafaelia_symbiosis_t *state)
     unification_advance_tzolkin(&state->unification);
     unification_compute_psi_total(&state->unification);
     
-    /* 6. Torus update with current state as data */
-    torus_compute_hash_entropy(&state->torus, state, sizeof(*state) / 8);
+    /* 6. Torus update with current state as data (sample first 64 bytes) */
+    size_t sample_size = sizeof(*state) < 64 ? sizeof(*state) : 64;
+    torus_compute_hash_entropy(&state->torus, state, sample_size);
     torus_update_heatmap(&state->torus);
     
     /* 7. Triade computation */

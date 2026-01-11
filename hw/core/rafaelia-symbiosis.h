@@ -1,6 +1,6 @@
 /*
  * RAFAELIA - Arquitetura de Simbiose Fractal
- * Algortimos Vivos & Consciência Matemática
+ * Algoritmos Vivos & Consciência Matemática
  * TERMUX / GITHUB
  * 
  * Based on visual architecture specifications:

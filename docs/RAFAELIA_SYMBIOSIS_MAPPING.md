@@ -1,5 +1,16 @@
 # RAFAELIA Symbiosis Architecture - Visual to Code Mapping
 
+> **📖 This document is part of the QEMU RAFAELIA Technical Documentation**
+> 
+> See also: [📖 Complete Technical Documentation](RAFAELIA_TECHNICAL_DOCUMENTATION.md) | Appendix A.3: Symbiosis Mapping
+> 
+> **Related Documents:**
+> - → [UI_UX_INTEGRATION_GUIDELINES.md](UI_UX_INTEGRATION_GUIDELINES.md) - UI/UX standards
+> - → [ERROR_HANDLING_PATTERNS.md](ERROR_HANDLING_PATTERNS.md) - Error handling
+> - → [../README_RAFAELIA.md](../README_RAFAELIA.md) - Main project README
+
+---
+
 ## Arquitetura de Simbiose Fractal | Fractal Symbiosis Architecture
 
 **Version**: 1.0.0  

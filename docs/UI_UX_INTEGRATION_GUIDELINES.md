@@ -1,6 +1,17 @@
 # UI/UX Integration Guidelines for Android Frontend
 ## ISO 9001:2015 & ISO 8000 Compliant Design Standards
 
+> **📖 This document is part of the QEMU RAFAELIA Technical Documentation**
+> 
+> See also: [📖 Complete Technical Documentation](RAFAELIA_TECHNICAL_DOCUMENTATION.md) | Chapter 8: Quality Assurance
+> 
+> **Related Documents:**
+> - → [ERROR_HANDLING_PATTERNS.md](ERROR_HANDLING_PATTERNS.md) - Error taxonomy
+> - → [RAFAELIA_SYMBIOSIS_MAPPING.md](RAFAELIA_SYMBIOSIS_MAPPING.md) - Visual architecture
+> - → [../README_RAFAELIA.md](../README_RAFAELIA.md) - Main project README
+
+---
+
 **Version**: 1.0.0  
 **Date**: 2026-01-10  
 **Status**: Active  

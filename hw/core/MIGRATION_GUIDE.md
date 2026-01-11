@@ -1,5 +1,16 @@
 # Migration Guide: From Struct-Based to Matrix-Based RAFAELIA
 
+> **📖 This document is part of the QEMU RAFAELIA Technical Documentation**
+> 
+> See also: [📖 Complete Technical Documentation](../../docs/RAFAELIA_TECHNICAL_DOCUMENTATION.md) | Appendix A.4: Migration Guide
+> 
+> **Related Documents:**
+> - → [RAFAELIA_README.md](RAFAELIA_README.md) - Core API reference
+> - → [MATRIX_REFACTORING.md](MATRIX_REFACTORING.md) - Architecture reference
+> - → [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) - Implementation summary
+
+---
+
 ## Overview
 
 This guide explains how to migrate from the old struct-based RAFAELIA implementation to the new ultra-low-level matrix-based approach.

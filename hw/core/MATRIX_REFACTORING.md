@@ -1,5 +1,16 @@
 # RAFAELIA Matrix Core - Ultra Low-Level Implementation
 
+> **📖 This document is part of the QEMU RAFAELIA Technical Documentation**
+> 
+> See also: [📖 Complete Technical Documentation](../../docs/RAFAELIA_TECHNICAL_DOCUMENTATION.md) | Chapter 4.5: Matrix Core
+> 
+> **Related Documents:**
+> - → [RAFAELIA_README.md](RAFAELIA_README.md) - Core API reference
+> - → [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) - Implementation summary
+> - → [README_MATRIX.md](README_MATRIX.md) - Quick start guide
+
+---
+
 ## Overview
 
 Complete refactoring of RAFAELIA core to ultra-low-level matrix-based implementation with:

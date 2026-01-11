@@ -1,6 +1,17 @@
 # QEMU Error Handling Patterns for Android Integration
 ## Professional Error Codes and User-Facing Messages
 
+> **📖 This document is part of the QEMU RAFAELIA Technical Documentation**
+> 
+> See also: [📖 Complete Technical Documentation](RAFAELIA_TECHNICAL_DOCUMENTATION.md) | Appendix B: Error Codes
+> 
+> **Related Documents:**
+> - → [UI_UX_INTEGRATION_GUIDELINES.md](UI_UX_INTEGRATION_GUIDELINES.md) - UI/UX standards
+> - → [RAFAELIA_SYMBIOSIS_MAPPING.md](RAFAELIA_SYMBIOSIS_MAPPING.md) - Visual architecture
+> - → [../README_RAFAELIA.md](../README_RAFAELIA.md) - Main project README
+
+---
+
 **Version**: 1.0.0  
 **Date**: 2026-01-10  
 **Standard Compliance**: ISO 9001:2015 (Quality Management), ISO 8000 (Data Quality)

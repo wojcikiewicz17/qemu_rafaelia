@@ -1,5 +1,16 @@
 # QEMU Process Improvements Documentation
 
+> **📖 This document is part of the QEMU RAFAELIA Technical Documentation**
+> 
+> See also: [📖 Complete Technical Documentation](RAFAELIA_TECHNICAL_DOCUMENTATION.md) | Chapter 5: Performance Benchmarks
+> 
+> **Related Documents:**
+> - → [../QEMU_IMPROVEMENTS_README.md](../QEMU_IMPROVEMENTS_README.md) - Summary (root)
+> - → [../RAFAELIA_IMPLEMENTATION.md](../RAFAELIA_IMPLEMENTATION.md) - Core implementation
+> - → [../README_RAFAELIA.md](../README_RAFAELIA.md) - Main project README
+
+---
+
 ## Overview
 
 This document describes the performance improvements made to QEMU core processes without modifying external repository dependencies. All improvements focus on the QEMU codebase itself.

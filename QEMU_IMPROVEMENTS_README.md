@@ -1,5 +1,16 @@
 # QEMU Rafaelia - Process Improvements Summary
 
+> **📖 This document is part of the QEMU RAFAELIA Technical Documentation**
+> 
+> See also: [📖 Complete Technical Documentation](docs/RAFAELIA_TECHNICAL_DOCUMENTATION.md) | Chapter 5: Performance Benchmarks
+> 
+> **Related Documents:**
+> - → [docs/QEMU_PROCESS_IMPROVEMENTS.md](docs/QEMU_PROCESS_IMPROVEMENTS.md) - Detailed technical documentation
+> - → [RAFAELIA_IMPLEMENTATION.md](RAFAELIA_IMPLEMENTATION.md) - RAFAELIA core implementation
+> - → [README_RAFAELIA.md](README_RAFAELIA.md) - Main project README
+
+---
+
 ## Objetivo / Goal
 
 Melhorar apenas nos processos do QEMU, ou seja, não nas dependências de outros repositórios.

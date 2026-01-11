@@ -527,6 +527,7 @@ void torus_init(torus_data_t *torus)
 /* Simple hash function using djb2 algorithm */
 static uint64_t simple_hash(const uint8_t *data, size_t len)
 {
+    /* djb2 hash algorithm initial value */
     /* djb2 hash algorithm initial value (magic constant from Dan Bernstein) */
     uint64_t hash = 5381;
     for (size_t i = 0; i < len; i++) {

@@ -42,6 +42,7 @@ system_ss.add(files(
   'qdev-hotplug.c',
   'qdev-properties-system.c',
   'rafaelia-core.c',
+  'rafaelia-symbiosis.c',
   'reset.c',
   'sysbus.c',
   'vm-change-state-handler.c',

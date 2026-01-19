@@ -9,6 +9,7 @@
 > - → [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) - Implementation summary
 > - → [README_MATRIX.md](README_MATRIX.md) - Quick start guide
 > - → [../../RAFAELIA_IMPLEMENTATION.md](../../RAFAELIA_IMPLEMENTATION.md) - Core implementation (root)
+> - → [../../docs/RAFAELIA_MODULOMR.md](../../docs/RAFAELIA_MODULOMR.md) - Authorship and licensing registry (ModulomR)
 
 ---
 

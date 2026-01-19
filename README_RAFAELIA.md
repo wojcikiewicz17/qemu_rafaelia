@@ -127,6 +127,7 @@ UserLAnd ←→ [QEMU Rafaelia Hub] ←→ Magisk (Root)
 | [RAFAELIA_IMPLEMENTATION.md](RAFAELIA_IMPLEMENTATION.md) | RAFAELIA core implementation | Chapter 4 |
 | [hw/core/RAFAELIA_README.md](hw/core/RAFAELIA_README.md) | Core API reference | Chapter 7.1 |
 | [hw/core/MATRIX_REFACTORING.md](hw/core/MATRIX_REFACTORING.md) | Matrix core architecture | Chapter 4.5 |
+| [docs/RAFAELIA_MODULOMR.md](docs/RAFAELIA_MODULOMR.md) | Authorship and licensing registry (ModulomR) | Appendix D |
 
 #### UI/UX Documentation (ISO 9001/8000 Compliant)
 | Document | Description | Chapter in Main Doc |

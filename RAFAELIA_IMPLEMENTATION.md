@@ -104,6 +104,7 @@ Practical examples showing:
   - Constants and literals
   - Usage examples
   - Formula index
+- `docs/RAFAELIA_MODULOMR.md` - Authorship and licensing registry (ModulomR)
 
 ## Key Features
 

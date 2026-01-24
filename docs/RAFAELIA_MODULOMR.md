@@ -30,6 +30,9 @@ A função `rafaelia_modulomr_entries()` expõe o inventário de autoria. Essa l
 serve como referência para documentação, revisão de licenças e histórico de
 contribuições.
 
+Entradas autorais recentes incluem o **RAFAELIA_RMR**, focado em reduzir
+overhead de alocação e expor perfil de hardware para otimizações low-level.
+
 ---
 
 ## Como atualizar o registro

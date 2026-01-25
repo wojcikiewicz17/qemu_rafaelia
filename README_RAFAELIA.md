@@ -128,6 +128,7 @@ UserLAnd ←→ [QEMU Rafaelia Hub] ←→ Magisk (Root)
 | [hw/core/RAFAELIA_README.md](hw/core/RAFAELIA_README.md) | Core API reference | Chapter 7.1 |
 | [hw/core/MATRIX_REFACTORING.md](hw/core/MATRIX_REFACTORING.md) | Matrix core architecture | Chapter 4.5 |
 | [docs/RAFAELIA_MODULOMR.md](docs/RAFAELIA_MODULOMR.md) | Authorship and licensing registry (ModulomR) | Appendix D |
+| [docs/RAFAELIA_RMR.md](docs/RAFAELIA_RMR.md) | Runtime Memory Reduction (RMR) module | Appendix D |
 
 #### UI/UX Documentation (ISO 9001/8000 Compliant)
 | Document | Description | Chapter in Main Doc |

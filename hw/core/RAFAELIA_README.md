@@ -206,6 +206,8 @@ RMR oferece um pool de memória de baixa latência para blocos e um perfil simpl
 de hardware (cache line, páginas e arquitetura), facilitando interoperabilidade
 low-level sem camadas de abstração adicionais.
 
+Consulte a documentação dedicada em `docs/RAFAELIA_RMR.md`.
+
 ### Wisdom Index
 
 ```c

@@ -31,7 +31,8 @@ serve como referência para documentação, revisão de licenças e histórico d
 contribuições.
 
 Entradas autorais recentes incluem o **RAFAELIA_RMR**, focado em reduzir
-overhead de alocação e expor perfil de hardware para otimizações low-level.
+overhead de alocação e expor perfil de hardware para otimizações low-level. A
+documentação técnica do módulo está em `docs/RAFAELIA_RMR.md`.
 
 ---
 
@@ -55,6 +56,13 @@ overhead de alocação e expor perfil de hardware para otimizações low-level.
 - **Evitar duplicidade**: apenas o essencial para rastrear autoria.
 - **Seguir o licenciamento do QEMU** conforme indicado nos arquivos e nas
   licenças raiz (`COPYING`, `COPYING.LIB`).
+
+## Política de licenciamento
+
+- **Não adicionar licenças pessoais**: o ModulomR não substitui o licenciamento
+  do repositório e não admite licenças proprietárias individuais.
+- **Manter compatibilidade**: toda alteração RAFAELIA deve respeitar o conjunto
+  de licenças existentes (`COPYING`, `COPYING.LIB`).
 
 ---
 

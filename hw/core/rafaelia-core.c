@@ -297,9 +297,25 @@ rafaelia_bloco_t *rafaelia_bloco_create(uint64_t id)
     bloco->estado = 1; /* Active state */
     
     /* Initialize coefficients and attitudes to unity */
-    for (int i = 0; i < RAFAELIA_MATRIX_SIZE; i++) {
-        bloco->coeficientes[i] = 1.0;
-        bloco->atitudes[i] = 1.0;
+    {
+        int i = 0;
+        double *coef = bloco->coeficientes;
+        double *att = bloco->atitudes;
+
+        for (; i + 3 < RAFAELIA_MATRIX_SIZE; i += 4) {
+            coef[i] = 1.0;
+            coef[i + 1] = 1.0;
+            coef[i + 2] = 1.0;
+            coef[i + 3] = 1.0;
+            att[i] = 1.0;
+            att[i + 1] = 1.0;
+            att[i + 2] = 1.0;
+            att[i + 3] = 1.0;
+        }
+        for (; i < RAFAELIA_MATRIX_SIZE; i++) {
+            coef[i] = 1.0;
+            att[i] = 1.0;
+        }
     }
     
     /* Initialize retroalimentation */
@@ -328,19 +344,30 @@ void rafaelia_bloco_free(rafaelia_bloco_t *bloco)
 double rafaelia_bloco_evaluate(const rafaelia_bloco_t *bloco, 
                               double phi_ethica, double owl_psi)
 {
-    double sum = 0.0;
-    
-    /* Σ_{i=1}^{33} Σ_{j=1}^{33} [ C_{i,j}·A_{i,j}·Φ_{Ethica} ] */
-    for (int i = 0; i < RAFAELIA_MATRIX_SIZE; i++) {
-        for (int j = 0; j < RAFAELIA_MATRIX_SIZE; j++) {
-            double c_ij = bloco->coeficientes[i];
-            double a_ij = bloco->atitudes[j];
-            sum += c_ij * a_ij * phi_ethica;
-        }
+    if (phi_ethica == 0.0 || owl_psi == 0.0) {
+        return 0.0;
     }
-    
+
+    double sum_coef = 0.0;
+    double sum_att = 0.0;
+    const double *coef = bloco->coeficientes;
+    const double *att = bloco->atitudes;
+    int i = 0;
+
+    /* Σ_{i=1}^{33} Σ_{j=1}^{33} [ C_{i,j}·A_{i,j}·Φ_{Ethica} ]
+     * Equivalent: (Σ_i C_i) * (Σ_j A_j) * Φ_{Ethica}
+     */
+    for (; i + 3 < RAFAELIA_MATRIX_SIZE; i += 4) {
+        sum_coef += coef[i] + coef[i + 1] + coef[i + 2] + coef[i + 3];
+        sum_att += att[i] + att[i + 1] + att[i + 2] + att[i + 3];
+    }
+    for (; i < RAFAELIA_MATRIX_SIZE; i++) {
+        sum_coef += coef[i];
+        sum_att += att[i];
+    }
+
     /* Apply OWLψ weighting */
-    return sum * owl_psi;
+    return (sum_coef * sum_att * phi_ethica) * owl_psi;
 }
 
 /* Hash and integrity operations */

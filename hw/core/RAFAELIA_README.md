@@ -189,6 +189,25 @@ double rafaelia_bloco_evaluate(const rafaelia_bloco_t *bloco,
 - **Formula 76**: Fᵦ(Bloco_n) evaluation with ethical filter
 - **Formula 80**: Block structure definition
 
+### RMR (Runtime Memory Reduction)
+
+```c
+rafaelia_rmr_pool_t *rafaelia_rmr_pool_create(size_t element_size,
+                                              uint32_t capacity,
+                                              uint32_t alignment);
+void rafaelia_rmr_pool_destroy(rafaelia_rmr_pool_t *pool);
+void *rafaelia_rmr_pool_alloc(rafaelia_rmr_pool_t *pool);
+void rafaelia_rmr_pool_free(rafaelia_rmr_pool_t *pool, void *ptr);
+bool rafaelia_rmr_pool_owns(const rafaelia_rmr_pool_t *pool, const void *ptr);
+void rafaelia_rmr_detect(rafaelia_rmr_hw_profile_t *profile);
+```
+
+RMR oferece um pool de memória de baixa latência para blocos e um perfil simples
+de hardware (cache line, páginas e arquitetura), facilitando interoperabilidade
+low-level sem camadas de abstração adicionais.
+
+Consulte a documentação dedicada em `docs/RAFAELIA_RMR.md`.
+
 ### Wisdom Index
 
 ```c

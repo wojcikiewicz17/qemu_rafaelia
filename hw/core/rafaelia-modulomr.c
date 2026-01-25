@@ -20,6 +20,13 @@ static const rafaelia_modulomr_entry_t rafaelia_modulomr_table[] = {
         .license = "Follow the file header and COPYING/COPYING.LIB.",
         .origin = "Rafaelia authorship registry (docs/RAFAELIA_MODULOMR.md).",
     },
+    {
+        .identifier = "RAFAELIA_RMR",
+        .scope = "include/hw/core/rafaelia-rmr.h, hw/core/rafaelia-rmr.c, hw/core/rafaelia-core.c, docs/RAFAELIA_RMR.md",
+        .summary = "Low-overhead runtime memory pool and hardware profile hints.",
+        .license = "Follow the file header and COPYING/COPYING.LIB.",
+        .origin = "Rafaelia runtime optimization module (docs/RAFAELIA_MODULOMR.md).",
+    },
 };
 
 const rafaelia_modulomr_entry_t *rafaelia_modulomr_entries(size_t *count)

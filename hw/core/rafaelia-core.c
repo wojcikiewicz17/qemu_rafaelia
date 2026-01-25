@@ -7,10 +7,41 @@
  */
 
 #include "hw/core/rafaelia-core.h"
+#include "hw/core/rafaelia-rmr.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+
+enum {
+    RAFAELIA_RMR_BLOCK_POOL_CAPACITY = 256,
+};
+
+static rafaelia_rmr_pool_t *rafaelia_bloco_pool;
+static uint32_t rafaelia_bloco_pool_users;
+
+static void rafaelia_bloco_pool_acquire(void)
+{
+    if (!rafaelia_bloco_pool) {
+        rafaelia_bloco_pool = rafaelia_rmr_pool_create(sizeof(rafaelia_bloco_t),
+                                                       RAFAELIA_RMR_BLOCK_POOL_CAPACITY,
+                                                       0);
+    }
+    rafaelia_bloco_pool_users++;
+}
+
+static void rafaelia_bloco_pool_release(void)
+{
+    if (rafaelia_bloco_pool_users == 0) {
+        return;
+    }
+
+    rafaelia_bloco_pool_users--;
+    if (rafaelia_bloco_pool_users == 0 && rafaelia_bloco_pool) {
+        rafaelia_rmr_pool_destroy(rafaelia_bloco_pool);
+        rafaelia_bloco_pool = NULL;
+    }
+}
 
 /* Core initialization */
 void rafaelia_core_init(rafaelia_core_t *core)
@@ -67,6 +98,8 @@ void rafaelia_core_init(rafaelia_core_t *core)
     
     /* Initialize stack pointer */
     core->stack_ptr = 0;
+
+    rafaelia_bloco_pool_acquire();
     
     /* Seed random number generator for noise generation */
     srand((unsigned int)time(NULL));
@@ -84,6 +117,8 @@ void rafaelia_core_cleanup(rafaelia_core_t *core)
         core->blocos = NULL;
     }
     core->bloco_count = 0;
+
+    rafaelia_bloco_pool_release();
 }
 
 /* Cycle operations - ψχρΔΣΩ */
@@ -246,7 +281,13 @@ double rafaelia_formula_fibonacci_rafael(int n, double prev)
 /* Create a new block - Formula 80: Bloco_n structure */
 rafaelia_bloco_t *rafaelia_bloco_create(uint64_t id)
 {
-    rafaelia_bloco_t *bloco = calloc(1, sizeof(rafaelia_bloco_t));
+    rafaelia_bloco_t *bloco = NULL;
+    if (rafaelia_bloco_pool) {
+        bloco = rafaelia_rmr_pool_alloc(rafaelia_bloco_pool);
+    }
+    if (!bloco) {
+        bloco = calloc(1, sizeof(rafaelia_bloco_t));
+    }
     if (!bloco) {
         return NULL;
     }
@@ -271,6 +312,15 @@ rafaelia_bloco_t *rafaelia_bloco_create(uint64_t id)
 
 void rafaelia_bloco_free(rafaelia_bloco_t *bloco)
 {
+    if (!bloco) {
+        return;
+    }
+
+    if (rafaelia_rmr_pool_owns(rafaelia_bloco_pool, bloco)) {
+        rafaelia_rmr_pool_free(rafaelia_bloco_pool, bloco);
+        return;
+    }
+
     free(bloco);
 }
 

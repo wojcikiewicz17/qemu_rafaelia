@@ -2,12 +2,15 @@
 set -euo pipefail
 
 if [[ -z "${QEMU_BIN:-}" ]]; then
-  echo "QEMU_BIN is not set; skipping RAFAELIA runtime smoke test."
-  exit 0
+  if [[ -x "./build/qemu-system-x86_64" ]]; then
+    QEMU_BIN="./build/qemu-system-x86_64"
+  elif command -v qemu-system-x86_64 >/dev/null 2>&1; then
+    QEMU_BIN="$(command -v qemu-system-x86_64)"
+  fi
 fi
 
-if [[ ! -x "$QEMU_BIN" ]]; then
-  echo "QEMU_BIN is not executable: $QEMU_BIN"
+if [[ -z "${QEMU_BIN:-}" || ! -x "$QEMU_BIN" ]]; then
+  echo "QEMU_BIN is not set or executable; set QEMU_BIN to your qemu-system-x86_64 binary."
   exit 1
 fi
 

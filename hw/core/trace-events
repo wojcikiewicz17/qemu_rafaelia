@@ -34,6 +34,6 @@ clock_set_mul_div(const char *clk, uint32_t oldmul, uint32_t mul, uint32_t olddi
 cpu_reset(int cpu_index) "%d"
 
 # rafaelia-runtime.c
-rafaelia_runtime_tick(uint64_t ticks_total, double dt_last_us, double dt_avg_us, double dt_p95_us, double score_ec, uint32_t scale, uint32_t backoff, double entropy_last, double coherence_last, bool running, const char *mode) "ticks=%" PRIu64 " dt_last_us=%.3f dt_avg_us=%.3f dt_p95_us=%.3f score_ec=%.6f scale=%u backoff=%u entropy=%.6f coherence=%.6f running=%d mode=%s"
+rafaelia_runtime_tick(uint64_t ticks_total, double entropy_last, double coherence_last, bool running, const char *mode) "ticks=%" PRIu64 " entropy=%.6f coherence=%.6f running=%d mode=%s"
 rafaelia_runtime_state_change(bool running, const char *state) "running=%d state=%s"
 rafaelia_runtime_shutdown(uint64_t ticks_total, double entropy_last, double coherence_last) "ticks=%" PRIu64 " entropy=%.6f coherence=%.6f"

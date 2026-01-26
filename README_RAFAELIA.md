@@ -132,6 +132,7 @@ UserLAnd ←→ [QEMU Rafaelia Hub] ←→ Magisk (Root)
 | [RAFAELIA_IMPLEMENTATION.md](RAFAELIA_IMPLEMENTATION.md) | RAFAELIA core implementation | Chapter 4 |
 | [hw/core/RAFAELIA_README.md](hw/core/RAFAELIA_README.md) | Core API reference | Chapter 7.1 |
 | [hw/core/MATRIX_REFACTORING.md](hw/core/MATRIX_REFACTORING.md) | Matrix core architecture | Chapter 4.5 |
+| [docs/RAFAELIA_AUTHORSHIP_BOUNDARIES.md](docs/RAFAELIA_AUTHORSHIP_BOUNDARIES.md) | Authorship boundaries, framework layers, and module map | Appendix D |
 | [docs/RAFAELIA_MODULOMR.md](docs/RAFAELIA_MODULOMR.md) | Authorship and licensing registry (ModulomR) | Appendix D |
 | [docs/RAFAELIA_RMR.md](docs/RAFAELIA_RMR.md) | Runtime Memory Reduction (RMR) module | Appendix D |
 

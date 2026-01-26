@@ -19,6 +19,9 @@ alterações específicas da RAFAELIA. Ele centraliza:
 O módulo foi desenhado para facilitar auditorias e evitar que alterações
 específicas se percam no histórico geral do QEMU.
 
+Para garantir separação de autoria, as camadas e os módulos RAFAELIA são
+documentados em **docs/RAFAELIA_AUTHORSHIP_BOUNDARIES.md**.
+
 ---
 
 ## Localização do Módulo
@@ -63,6 +66,15 @@ documentação técnica do módulo está em `docs/RAFAELIA_RMR.md`.
   do repositório e não admite licenças proprietárias individuais.
 - **Manter compatibilidade**: toda alteração RAFAELIA deve respeitar o conjunto
   de licenças existentes (`COPYING`, `COPYING.LIB`).
+
+## Camadas e módulos RAFAELIA
+
+O mapa de camadas e módulos está em:
+
+- `docs/RAFAELIA_AUTHORSHIP_BOUNDARIES.md`
+
+Use esse mapa como base para atualizar o ModulomR sempre que novas camadas,
+módulos ou documentos forem adicionados.
 
 ---
 

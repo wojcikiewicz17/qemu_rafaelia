@@ -35,6 +35,9 @@ Métricas mínimas registradas:
 - **Ω_ticks_total**: contador de ciclos
 - **E_entropy_last**: medida de entropia calculada por ciclo
 - **C_coherence_last**: coerência atual do núcleo
+- **dt_avg_us / dt_p95_us**: tempo médio e p95 do tick (µs)
+- **score_ec**: score E↔C com EWMA (coerência vs entropia)
+- **scale/backoff**: escala adaptativa + backoff por overhead
 
 Saídas:
 
@@ -51,6 +54,9 @@ Saídas:
   impacto em idle.
 - Existe **cap** de segurança (`RAFAELIA_RUNTIME_TICK_CAP`) para evitar
   burst excessivo.
+- Há **cap de overhead** (µs) com backoff automático de frequência.
+- O **governor adaptativo** aumenta/diminui a escala do tick conforme
+  estabilidade de entropia/coerência.
 
 ---
 
@@ -76,6 +82,7 @@ O estado é guardado em `rafaelia_runtime_state_t`, que mantém:
 ## Fecho (Ω)
 
 No shutdown do QEMU, o runtime emite o digest final via tracepoints e
+gera um relatório resumido (incluindo score e escala) com hash SHA-256 e
 finaliza o hub/core com limpeza segura.
 
 ---

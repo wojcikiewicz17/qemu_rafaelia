@@ -15,8 +15,8 @@ static const rafaelia_modulomr_entry_t rafaelia_modulomr_table[] = {
     },
     {
         .identifier = "RAFAELIA_RUNTIME_HOOK",
-        .scope = "include/hw/core/rafaelia-runtime.h, hw/core/rafaelia-runtime.c, hw/core/trace-events, system/vl.c, qemu-options.hx, docs/RAFAELIA_RUNTIME_HOOK.md",
-        .summary = "Runtime hook integration with main loop, runstate gating, and observability.",
+        .scope = "include/hw/core/rafaelia-runtime.h, hw/core/rafaelia-runtime.c, hw/core/trace-events, system/vl.c, qemu-options.hx, docs/RAFAELIA_RUNTIME_HOOK.md, tests/rafaelia-runtime-smoke.sh, tests/rafaelia-runtime-cli-test.sh",
+        .summary = "Runtime hook integration with QEMU timers, runstate gating, and observability.",
         .license = "Follow the file header and COPYING/COPYING.LIB.",
         .origin = "Rafaelia runtime integration layer (docs/RAFAELIA_RUNTIME_HOOK.md).",
     },

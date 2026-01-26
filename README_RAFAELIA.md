@@ -23,6 +23,10 @@
 > 
 > ### **[📖 RAFAELIA Technical Documentation](docs/RAFAELIA_TECHNICAL_DOCUMENTATION.md)**
 > 
+> **For professional, academic, and investor-grade positioning, see:**
+> 
+> ### **[📘 RAFAELIA Professional Dossier](docs/RAFAELIA_PROFESSIONAL_DOSSIER.md)**
+> 
 > The complete technical reference includes:
 > - Abstract (English & Portuguese)
 > - Preface and Acknowledgments
@@ -112,6 +116,7 @@ UserLAnd ←→ [QEMU Rafaelia Hub] ←→ Magisk (Root)
 
 #### 📖 Main Technical Documentation (PhD-Level)
 - **[📖 RAFAELIA Technical Documentation](docs/RAFAELIA_TECHNICAL_DOCUMENTATION.md)** - **Complete technical reference** (Abstract, Chapters 1-9, Appendices, Bibliography)
+- **[📘 RAFAELIA Professional Dossier](docs/RAFAELIA_PROFESSIONAL_DOSSIER.md)** - **Professional, academic, market, and investor overview**
 
 #### Integration Documentation
 | Document | Description | Chapter in Main Doc |

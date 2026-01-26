@@ -12,7 +12,7 @@ expondo um contrato mínimo de execução e provas de atividade (Ω/E↔C).
 O runtime RAFAELIA é acionado com três pontos principais:
 
 - `rafaelia_runtime_init()`
-- `rafaelia_runtime_tick(dt_ms)` *(implementado via main-loop notifier)*
+- `rafaelia_runtime_tick(dt_ms)` *(implementado via QEMU timer)*
 - `rafaelia_runtime_shutdown()`
 
 Essas chamadas vivem em `hw/core/rafaelia-runtime.c` e são configuradas via
@@ -22,9 +22,9 @@ Essas chamadas vivem em `hw/core/rafaelia-runtime.c` e são configuradas via
 
 ## Ponto de entrada (ψ)
 
-O hook é conectado ao **main loop** do QEMU via `main_loop_poll_add_notifier`,
-executado após cada ciclo de `main_loop_wait()`. O bootstrap ocorre em
-`system/vl.c` logo após `qemu_init_main_loop()`.
+O hook é conectado ao **main loop** do QEMU via `QEMUTimer` em
+`QEMU_CLOCK_REALTIME`, garantindo baixa latência sem busy loop. O bootstrap
+ocorre em `system/vl.c` logo após `qemu_init_main_loop()`.
 
 ---
 
@@ -39,7 +39,7 @@ Métricas mínimas registradas:
 Saídas:
 
 - `trace_rafaelia_runtime_tick()` (modo `trace`)
-- `error_report()` (modo `log` ou `debug=on`)
+- `qemu_log_mask(LOG_TRACE, ...)` (modo `log` ou `debug=1`)
 - `trace_rafaelia_runtime_shutdown()` no fechamento
 
 ---
@@ -85,10 +85,10 @@ finaliza o hub/core com limpeza segura.
 CLI (QEMU):
 
 ```
--rafaelia on|off[,tick_ms=ms][,mode=MODE][,debug=on|off]
+-rafaelia enable=on|off[,mode=0..N][,tick_ms=ms][,debug=0|1]
 ```
 
-Modos suportados: `silent`, `log`, `trace`, `symbiosis`, `audit`, `bench`.
+Modos suportados (0..N): `silent`, `log`, `trace`, `symbiosis`, `audit`, `bench`.
 
 ---
 

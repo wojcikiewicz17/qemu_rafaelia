@@ -3714,7 +3714,9 @@ void qemu_init(int argc, char **argv)
                 if (mode &&
                     !rafaelia_runtime_parse_mode(mode,
                                                  &rafaelia_runtime_config.mode)) {
-                    error_report("Unknown RAFAELIA mode: %s", mode);
+                    error_report("Invalid RAFAELIA mode: %s (expected 0..%u or "
+                                 "silent/log/trace/symbiosis/audit/bench)",
+                                 mode, RAFAELIA_RUNTIME_MODE_BENCH);
                     exit(1);
                 }
                 break;

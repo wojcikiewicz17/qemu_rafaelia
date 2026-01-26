@@ -14,6 +14,8 @@ if [[ -z "${QEMU_BIN:-}" || ! -x "$QEMU_BIN" ]]; then
   exit 1
 fi
 
+log_file="$(mktemp)"
+
 output=$( {
   sleep 0.2
   printf 'quit\n'
@@ -26,13 +28,32 @@ output=$( {
     -monitor stdio \
     -no-reboot \
     -no-shutdown \
-    -rafaelia on,mode=log,tick_ms=10 \
+    -d trace \
+    -D "$log_file" \
+    -rafaelia enable=on,mode=1,tick_ms=10 \
     2>&1 )
 
-if ! grep -q "RAFAELIA runtime tick=" <<<"$output"; then
-  echo "RAFAELIA runtime did not emit tick output."
+if ! grep -q "RAFAELIA runtime init" "$log_file"; then
+  echo "RAFAELIA runtime did not emit init output."
+  cat "$log_file"
   echo "$output"
   exit 1
 fi
+
+if ! grep -q "RAFAELIA runtime tick=" "$log_file"; then
+  echo "RAFAELIA runtime did not emit tick output."
+  cat "$log_file"
+  echo "$output"
+  exit 1
+fi
+
+if ! grep -q "RAFAELIA runtime shutdown" "$log_file"; then
+  echo "RAFAELIA runtime did not emit shutdown output."
+  cat "$log_file"
+  echo "$output"
+  exit 1
+fi
+
+rm -f "$log_file"
 
 echo "RAFAELIA runtime smoke test passed."

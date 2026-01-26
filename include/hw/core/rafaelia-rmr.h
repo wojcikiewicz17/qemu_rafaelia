@@ -38,6 +38,7 @@ rafaelia_rmr_pool_t *rafaelia_rmr_pool_create(size_t element_size,
                                               uint32_t alignment);
 void rafaelia_rmr_pool_destroy(rafaelia_rmr_pool_t *pool);
 void *rafaelia_rmr_pool_alloc(rafaelia_rmr_pool_t *pool);
+void *rafaelia_rmr_pool_alloc_uninitialized(rafaelia_rmr_pool_t *pool);
 void rafaelia_rmr_pool_free(rafaelia_rmr_pool_t *pool, void *ptr);
 bool rafaelia_rmr_pool_owns(const rafaelia_rmr_pool_t *pool, const void *ptr);
 

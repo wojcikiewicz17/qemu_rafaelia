@@ -86,10 +86,24 @@ void *rafaelia_rmr_pool_alloc(rafaelia_rmr_pool_t *pool)
         return NULL;
     }
 
+    entry = rafaelia_rmr_pool_alloc_uninitialized(pool);
+    if (entry) {
+        rafaelia_rmr_memzero(entry, pool->element_size);
+    }
+    return entry;
+}
+
+void *rafaelia_rmr_pool_alloc_uninitialized(rafaelia_rmr_pool_t *pool)
+{
+    void *entry;
+
+    if (!pool || !pool->free_list) {
+        return NULL;
+    }
+
     entry = pool->free_list;
     pool->free_list = *(void **)entry;
     pool->in_use++;
-    rafaelia_rmr_memzero(entry, pool->element_size);
     return entry;
 }
 

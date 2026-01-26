@@ -984,27 +984,58 @@ bool rafaelia_integration_check_ethical_compliance(
     double threshold);
 ```
 
-### 7.3 MVP Modules API
+### 7.3 Runtime Memory Reduction (RMR) API
+
+```c
+/**
+ * @brief Create a fixed-capacity pool for high-frequency allocations.
+ */
+rafaelia_rmr_pool_t *rafaelia_rmr_pool_create(size_t element_size,
+                                              uint32_t capacity,
+                                              uint32_t alignment);
+
+/**
+ * @brief Allocate and zero-initialize one entry from the pool.
+ */
+void *rafaelia_rmr_pool_alloc(rafaelia_rmr_pool_t *pool);
+
+/**
+ * @brief Allocate one entry without zero-initialize (caller must init fields).
+ */
+void *rafaelia_rmr_pool_alloc_uninitialized(rafaelia_rmr_pool_t *pool);
+
+/**
+ * @brief Return an entry to the pool.
+ */
+void rafaelia_rmr_pool_free(rafaelia_rmr_pool_t *pool, void *ptr);
+
+/**
+ * @brief Detect minimal hardware profile (cache line, page size, arch).
+ */
+void rafaelia_rmr_detect(rafaelia_rmr_hw_profile_t *profile);
+```
+
+### 7.4 MVP Modules API
 
 The MVP modules provide specialized functionality for specific use cases. See `include/hw/core/rafaelia-mvp-modules.h` for complete API documentation.
 
-### 7.4 Matrix Core API
+### 7.5 Matrix Core API
 
-#### 7.4.1 Initialization
+#### 7.5.1 Initialization
 
 ```c
 void z0(void);  // Initialize all state matrices
 void z1(void);  // Cleanup all state
 ```
 
-#### 7.4.2 Cycle Operations
+#### 7.5.2 Cycle Operations
 
 ```c
 void y2(void);    // Execute one cycle step
 double y3(void);  // Measure cycle state
 ```
 
-#### 7.4.3 Direct Accessors
+#### 7.5.3 Direct Accessors
 
 ```c
 double y17(int index);           // Get cycle value
@@ -1015,7 +1046,7 @@ double y21(int index);           // Get metric value
 void y22(int index, double val); // Set metric value
 ```
 
-### 7.5 Related Documentation
+### 7.6 Related Documentation
 
 - → [hw/core/RAFAELIA_README.md](../hw/core/RAFAELIA_README.md)
 - → [include/hw/core/rafaelia-core.h](../include/hw/core/rafaelia-core.h)

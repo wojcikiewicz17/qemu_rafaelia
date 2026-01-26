@@ -98,6 +98,7 @@ make -f Makefile.integration test
 - **Retroalimentation**: Continuous improvement through feedback loops
 - **Health Monitoring**: Real-time system health and performance metrics
 - **Adaptive Optimization**: Self-tuning routing and resource allocation
+- **Runtime Memory Reduction (RMR)**: Pool allocator with optional fast-path allocations for hot structures
 
 ### Architecture
 

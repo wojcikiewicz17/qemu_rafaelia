@@ -10,7 +10,7 @@
 
 #include <stddef.h>
 
-#define RAFAELIA_MODULOMR_VERSION "1.0"
+#define RAFAELIA_MODULOMR_VERSION "1.1"
 
 typedef struct rafaelia_modulomr_entry {
     const char *identifier;

@@ -124,7 +124,7 @@ double y3(void) {
     double t9=i0(t8,t4);
     double t10=i0(t9,t5);
     
-    double t11=(t10<C7)?-t10:t10;
+    double t11=rl_abs(t10);
     double t12=i0(t11,C0);
     double t13=i0(t12,C13);
     
@@ -192,7 +192,7 @@ double y8(int p0, int p1, double a0) {
     double t0=(double)p0;
     double t1=(double)p1;
     double t2=i2(t0,t1);
-    double t3=(t2<C7)?-t2:t2;
+    double t3=rl_abs(t2);
     double t4=i3(t3,C11);
     double t5=i0(a0,t4);
     

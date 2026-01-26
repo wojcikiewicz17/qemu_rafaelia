@@ -3,6 +3,8 @@
 #ifndef RAFAELIA_MATRIX_CORE_H
 #define RAFAELIA_MATRIX_CORE_H
 
+#include "rafaelia-lowlevel.h"
+
 /* Matrix positions - coherent indexing */
 #define M00 0
 #define M01 1
@@ -85,13 +87,13 @@ double f8(double);
 double f9(double,double,double,double);
 
 /* Inline operations - 1 flip N flops */
-static inline double i0(double a, double b) { return a*b; }
-static inline double i1(double a, double b) { return a+b; }
-static inline double i2(double a, double b) { return a-b; }
-static inline double i3(double a, double b) { return a/b; }
-static inline double i4(double a) { return a*a; }
-static inline double i5(double a) { return a*a*a; }
-static inline double i6(double a) { return a*a*a*a*a*a; }
+static inline double i0(double a, double b) { return rl_mul(a, b); }
+static inline double i1(double a, double b) { return rl_add(a, b); }
+static inline double i2(double a, double b) { return rl_sub(a, b); }
+static inline double i3(double a, double b) { return rl_div(a, b); }
+static inline double i4(double a) { return rl_square(a); }
+static inline double i5(double a) { return rl_cube(a); }
+static inline double i6(double a) { return rl_pow6(a); }
 static inline void i7(double*m,int i,double v){if(i>=M00&&i<D0){m[i]=v;}}
 static inline double i8(double*m,int i){return(i>=M00&&i<D0)?m[i]:C7;}
 static inline void i9(double*d,double*s,int n){int i=M00;int lim=(n<D0)?n:D0;while(i<lim){d[i]=s[i];i=i+1;}}

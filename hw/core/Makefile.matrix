@@ -6,27 +6,28 @@ CFLAGS=-O2 -Wall -Wno-unused-function -fno-strict-aliasing
 LDFLAGS=-lm
 
 MATRIX_CORE=rafaelia-matrix-core
+LOWLEVEL=rafaelia-lowlevel
 REFACTORED=rafaelia-refactored
 
 all: test
 
-matrix: $(MATRIX_CORE).c $(MATRIX_CORE).h rafaelia-matrix-test.c
+matrix: $(MATRIX_CORE).c $(MATRIX_CORE).h $(LOWLEVEL).c $(LOWLEVEL).h rafaelia-matrix-test.c
 	$(CC) $(CFLAGS) -DTEST_STANDALONE -I. \
-		$(MATRIX_CORE).c rafaelia-matrix-test.c \
+		$(LOWLEVEL).c $(MATRIX_CORE).c rafaelia-matrix-test.c \
 		-o matrix-test $(LDFLAGS)
 
-refactored: $(MATRIX_CORE).c $(MATRIX_CORE).h \
+refactored: $(MATRIX_CORE).c $(MATRIX_CORE).h $(LOWLEVEL).c $(LOWLEVEL).h \
             $(REFACTORED).c $(REFACTORED).h \
             rafaelia-refactored-test.c
 	$(CC) $(CFLAGS) -DTEST_STANDALONE -I. \
-		$(MATRIX_CORE).c $(REFACTORED).c rafaelia-refactored-test.c \
+		$(LOWLEVEL).c $(MATRIX_CORE).c $(REFACTORED).c rafaelia-refactored-test.c \
 		-o refactored-test $(LDFLAGS)
 
-comparison: $(MATRIX_CORE).c $(MATRIX_CORE).h \
+comparison: $(MATRIX_CORE).c $(MATRIX_CORE).h $(LOWLEVEL).c $(LOWLEVEL).h \
             $(REFACTORED).c $(REFACTORED).h \
             rafaelia-comparison.c
 	$(CC) $(CFLAGS) -DTEST_COMPARISON -I. \
-		$(MATRIX_CORE).c $(REFACTORED).c rafaelia-comparison.c \
+		$(LOWLEVEL).c $(MATRIX_CORE).c $(REFACTORED).c rafaelia-comparison.c \
 		-o comparison-test $(LDFLAGS)
 
 test: matrix refactored comparison

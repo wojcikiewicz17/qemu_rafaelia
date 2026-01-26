@@ -14,6 +14,13 @@ static const rafaelia_modulomr_entry_t rafaelia_modulomr_table[] = {
         .origin = "Rafaelia authorship (see docs/RAFAELIA_MODULOMR.md).",
     },
     {
+        .identifier = "RAFAELIA_RUNTIME_HOOK",
+        .scope = "include/hw/core/rafaelia-runtime.h, hw/core/rafaelia-runtime.c, hw/core/trace-events, system/vl.c, qemu-options.hx, docs/RAFAELIA_RUNTIME_HOOK.md",
+        .summary = "Runtime hook integration with main loop, runstate gating, and observability.",
+        .license = "Follow the file header and COPYING/COPYING.LIB.",
+        .origin = "Rafaelia runtime integration layer (docs/RAFAELIA_RUNTIME_HOOK.md).",
+    },
+    {
         .identifier = "RAFAELIA_MODULOMR",
         .scope = "include/hw/core/rafaelia-modulomr.h, hw/core/rafaelia-modulomr.c",
         .summary = "Authorship and licensing registry module.",

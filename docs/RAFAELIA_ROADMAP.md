@@ -15,6 +15,7 @@ Este documento organiza o **roadmap** do projeto RAFAELIA, mapeando o que **já 
 | Guia de uso & API | [INTEGRATION_GUIDE.md](../INTEGRATION_GUIDE.md) | Guia de uso, API e fluxos de integração |
 | Resumo executivo | [INTEGRATION_SUMMARY.md](../INTEGRATION_SUMMARY.md) | Métricas, impactos e resultados |
 | Implementação core | [RAFAELIA_IMPLEMENTATION.md](../RAFAELIA_IMPLEMENTATION.md) | Núcleo RAFAELIA e fórmulas |
+| Hook de runtime | [docs/RAFAELIA_RUNTIME_HOOK.md](RAFAELIA_RUNTIME_HOOK.md) | Hook vivo, métricas e flags |
 | Otimizações QEMU | [QEMU_IMPROVEMENTS_README.md](../QEMU_IMPROVEMENTS_README.md) | Melhorias de performance e estabilidade |
 | UI/UX | [docs/UI_UX_INTEGRATION_GUIDELINES.md](UI_UX_INTEGRATION_GUIDELINES.md) | Padrões Android/ISO/WCAG |
 | Erros & recuperação | [docs/ERROR_HANDLING_PATTERNS.md](ERROR_HANDLING_PATTERNS.md) | Taxonomia de erros e estratégias |
@@ -65,6 +66,7 @@ Os documentos listados abaixo compõem o pacote essencial de entrega. Todos est�
 - Guia/API: [INTEGRATION_GUIDE.md](../INTEGRATION_GUIDE.md)
 - Resumo executivo: [INTEGRATION_SUMMARY.md](../INTEGRATION_SUMMARY.md)
 - Implementação core: [RAFAELIA_IMPLEMENTATION.md](../RAFAELIA_IMPLEMENTATION.md)
+- Hook de runtime: [docs/RAFAELIA_RUNTIME_HOOK.md](RAFAELIA_RUNTIME_HOOK.md)
 - Otimizações: [QEMU_IMPROVEMENTS_README.md](../QEMU_IMPROVEMENTS_README.md)
 - Simbiose: [docs/RAFAELIA_SYMBIOSIS_MAPPING.md](RAFAELIA_SYMBIOSIS_MAPPING.md)
 - UI/UX: [docs/UI_UX_INTEGRATION_GUIDELINES.md](UI_UX_INTEGRATION_GUIDELINES.md)

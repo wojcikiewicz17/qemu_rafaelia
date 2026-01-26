@@ -5532,6 +5532,17 @@ SRST
         otherwise the option is ignored. Default is off.
 ERST
 
+DEF("rafaelia", HAS_ARG, QEMU_OPTION_rafaelia,
+    "-rafaelia [on|off][,tick_ms=ms][,mode=MODE][,debug=on|off]\n"
+    "                enable RAFAELIA runtime hook\n",
+    QEMU_ARCH_ALL)
+SRST
+``-rafaelia [on|off][,tick_ms=ms][,mode=MODE][,debug=on|off]``
+    Enable the RAFAELIA runtime hook. ``tick_ms`` sets the runtime loop
+    cadence, ``mode`` selects the runtime mode (silent, log, trace,
+    symbiosis, audit, bench), and ``debug=on`` enables verbose logging.
+ERST
+
 DEF("dump-vmstate", HAS_ARG, QEMU_OPTION_dump_vmstate,
     "-dump-vmstate <file>\n"
     "                Output vmstate information in JSON format to file.\n"

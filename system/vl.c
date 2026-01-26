@@ -98,6 +98,7 @@
 #include "qemu/option.h"
 #include "qemu/config-file.h"
 #include "qemu/main-loop.h"
+#include "hw/core/rafaelia-runtime.h"
 #ifdef CONFIG_VIRTFS
 #include "fsdev/qemu-fsdev.h"
 #endif
@@ -202,6 +203,7 @@ static int default_cdrom = 1;
 static bool auto_create_sdcard = true;
 static int default_vga = 1;
 static int default_net = 1;
+static rafaelia_runtime_config_t rafaelia_runtime_config;
 
 static const struct {
     const char *driver;
@@ -379,6 +381,31 @@ static QemuOptsList qemu_msg_opts = {
             .type = QEMU_OPT_BOOL,
             .help = "Prepends guest name for error messages but only if "
                     "-name guest is set otherwise option is ignored\n",
+        },
+        { /* end of list */ }
+    },
+};
+
+static QemuOptsList qemu_rafaelia_opts = {
+    .name = "rafaelia",
+    .implied_opt_name = "enable",
+    .head = QTAILQ_HEAD_INITIALIZER(qemu_rafaelia_opts.head),
+    .desc = {
+        {
+            .name = "enable",
+            .type = QEMU_OPT_BOOL,
+        },
+        {
+            .name = "tick_ms",
+            .type = QEMU_OPT_NUMBER,
+        },
+        {
+            .name = "mode",
+            .type = QEMU_OPT_STRING,
+        },
+        {
+            .name = "debug",
+            .type = QEMU_OPT_BOOL,
         },
         { /* end of list */ }
     },
@@ -2850,6 +2877,8 @@ void qemu_init(int argc, char **argv)
     bool userconfig = true;
     FILE *vmstate_dump_file = NULL;
 
+    rafaelia_runtime_config = rafaelia_runtime_config_default();
+
     qemu_add_opts(&qemu_drive_opts);
     qemu_add_drive_opts(&qemu_legacy_drive_opts);
     qemu_add_drive_opts(&qemu_common_drive_opts);
@@ -2875,6 +2904,7 @@ void qemu_init(int argc, char **argv)
     qemu_add_opts(&qemu_tpmdev_opts);
     qemu_add_opts(&qemu_overcommit_opts);
     qemu_add_opts(&qemu_msg_opts);
+    qemu_add_opts(&qemu_rafaelia_opts);
     qemu_add_opts(&qemu_name_opts);
     qemu_add_opts(&qemu_numa_opts);
     qemu_add_opts(&qemu_icount_opts);
@@ -3657,6 +3687,38 @@ void qemu_init(int argc, char **argv)
                 }
                 configure_msg(opts);
                 break;
+            case QEMU_OPTION_rafaelia: {
+                const char *mode;
+                uint64_t tick_ms;
+
+                opts = qemu_opts_parse_noisily(qemu_find_opts("rafaelia"),
+                                               optarg, true);
+                if (!opts) {
+                    exit(1);
+                }
+
+                rafaelia_runtime_config.enabled =
+                    qemu_opt_get_bool(opts, "enable", true);
+                tick_ms = qemu_opt_get_number(opts, "tick_ms",
+                                              rafaelia_runtime_config.tick_ms);
+                if (tick_ms > UINT32_MAX) {
+                    error_report("RAFAELIA tick_ms out of range");
+                    exit(1);
+                }
+                rafaelia_runtime_config.tick_ms = (uint32_t)tick_ms;
+                rafaelia_runtime_config.debug =
+                    qemu_opt_get_bool(opts, "debug",
+                                      rafaelia_runtime_config.debug);
+
+                mode = qemu_opt_get(opts, "mode");
+                if (mode &&
+                    !rafaelia_runtime_parse_mode(mode,
+                                                 &rafaelia_runtime_config.mode)) {
+                    error_report("Unknown RAFAELIA mode: %s", mode);
+                    exit(1);
+                }
+                break;
+            }
             case QEMU_OPTION_dump_vmstate:
                 if (vmstate_dump_file) {
                     error_report("only one '-dump-vmstate' "
@@ -3756,6 +3818,8 @@ void qemu_init(int argc, char **argv)
 
     qemu_init_main_loop(&error_fatal);
     cpu_timers_init();
+    rafaelia_runtime_set_config(&rafaelia_runtime_config);
+    rafaelia_runtime_init();
 
     user_register_global_props();
     replay_configure(icount_opts);

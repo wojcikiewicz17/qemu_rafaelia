@@ -5,6 +5,7 @@
 - [Resumo executivo](#resumo-executivo)
 - [Introdução](#introdução)
 - [Escopo e metodologia](#escopo-e-metodologia)
+- [Inventário documental consolidado](#inventário-documental-consolidado)
 - [Análise das modificações detectadas](#análise-das-modificações-detectadas)
 - [Impacto técnico e operacional](#impacto-técnico-e-operacional)
 - [Comparativos e gráficos](#comparativos-e-gráficos)
@@ -15,12 +16,12 @@
 - [Anexos](#anexos)
 
 ## Prefácio
-Este relatório foi elaborado para analisar as mudanças detectadas no repositório, avaliar impactos técnicos, propor refatorações documentais e organizar um panorama de navegação e governança. O documento prioriza clareza, rastreabilidade e orientações práticas, mantendo linguagem formal e profissional.
+Este relatório foi elaborado para analisar as mudanças detectadas no repositório, avaliar impactos técnicos, consolidar o inventário documental e propor uma navegação profissional. O documento prioriza clareza, rastreabilidade e orientações práticas, mantendo linguagem formal e objetiva.
 
 ## Resumo executivo
-- Foi identificada uma atualização do `Cargo.lock` no módulo Rust, indicando atualização do formato do lockfile e ajustes na resolução de dependências.
-- A mudança altera metadados de dependências (ex.: `probe`) e remove uma referência a `trace` de um pacote interno, com impacto provável em pipelines e consistência de build.
-- Recomenda-se padronizar a documentação, consolidando a estrutura em camadas (Overview → Arquitetura → Integração → Detalhamento técnico).
+- O inventário atual confirma **31 documentos Markdown**, com concentração em `docs/` e `hw/`.
+- A documentação passou a ter um **índice de navegação profissional**, com clusters, métricas e roteiros por persona.
+- Recomenda-se padronizar a estrutura em camadas (Overview → Arquitetura → Integração → Detalhamento técnico), mantendo relatórios analíticos em `analysis_reports/`.
 
 ## Introdução
 O QEMU Rafaelia apresenta um conjunto extenso de módulos, integrações e documentação. Para reduzir ambiguidade, este relatório descreve as modificações, avalia impactos e fornece um plano de refatoração documental, além de uma proposta de navegação e métricas de benchmark.
@@ -33,9 +34,42 @@ O QEMU Rafaelia apresenta um conjunto extenso de módulos, integrações e docum
 
 **Metodologia**
 1. Inspeção do diff da árvore atual.
-2. Classificação dos impactos (build, runtime, docs).
-3. Proposta de reorganização documental.
-4. Definição de benchmark e MVPs.
+2. Inventário completo de documentos Markdown.
+3. Classificação dos impactos (build, runtime, docs).
+4. Proposta de reorganização documental.
+5. Definição de benchmark e MVPs.
+
+## Inventário documental consolidado
+### Visão geral
+- **Total de arquivos .md**: **31**.
+- **Concentração**: `docs/` (11 arquivos), `hw/` (6 arquivos), `analysis_reports/` (3 arquivos).
+
+### Distribuição por diretório
+| Diretório | Qtde. de .md | Observação |
+|---|---:|---|
+| `docs/` | 11 | Documentação Rafaelia e diretrizes técnicas. |
+| `hw/` | 6 | Core, Matrix, UEFI. |
+| `analysis_reports/` | 3 | Relatórios analíticos. |
+| `.gitlab/` | 2 | Templates de issues. |
+| `android/` | 1 | Integração Android. |
+| `scripts/` | 1 | Ferramentas de análise. |
+| `target/` | 1 | Documentação por target. |
+| Raiz | 6 | Integração e README principal. |
+
+### Mapa de navegação documental
+```mermaid
+flowchart TD
+  A[README_RAFAELIA.md] --> B[INTEGRATION_SUMMARY.md]
+  B --> C[INTEGRATION_ARCHITECTURE.md]
+  B --> D[INTEGRATION_GUIDE.md]
+  C --> E[docs/RAFAELIA_TECHNICAL_DOCUMENTATION.md]
+  E --> F[docs/RAFAELIA_ROADMAP.md]
+  E --> G[docs/RAFAELIA_RMR.md]
+  E --> H[docs/RAFAELIA_SYMBIOSIS_MAPPING.md]
+  E --> I[hw/core/IMPLEMENTATION_SUMMARY.md]
+  I --> J[hw/core/MIGRATION_GUIDE.md]
+  I --> K[hw/core/MATRIX_REFACTORING.md]
+```
 
 ## Análise das modificações detectadas
 ### 1) `rust/Cargo.lock`
@@ -60,6 +94,7 @@ O QEMU Rafaelia apresenta um conjunto extenso de módulos, integrações e docum
 | Build Rust | Atualização do formato do lockfile | Média | Pode exigir atualização do Cargo/Toolchain. |
 | Reprodutibilidade | Mais metadados no lockfile | Baixa | Melhor rastreabilidade. |
 | Testes | Dependência `trace` removida | Baixa/Média | Verificar se há teste faltante ou redirecionado. |
+| Documentação | Inventário consolidado | Baixa | Melhora navegação e governança. |
 
 ## Comparativos e gráficos
 ### Comparativo de dependências (antes vs. depois)
@@ -77,11 +112,24 @@ flowchart TD
   A --> D[Testes com menos dependências]
 ```
 
+### Gráfico de distribuição documental
+```mermaid
+pie title Distribuição de arquivos Markdown
+  "docs/" : 11
+  "hw/" : 6
+  "analysis_reports/" : 3
+  "raiz" : 6
+  ".gitlab/" : 2
+  "android/" : 1
+  "scripts/" : 1
+  "target/" : 1
+```
+
 ## Refatoração da documentação (plano proposto)
 ### Objetivos
 - Reduzir dispersão entre documentos da raiz e `docs/`.
 - Centralizar guias de integração e arquitetura.
-- Criar uma hierarquia navegável por temas.
+- Criar uma hierarquia navegável por temas e personas.
 
 ### Estrutura recomendada
 ```
@@ -100,9 +148,10 @@ flowchart TD
 | `INTEGRATION_*` | `/docs/03-integration/` | Centraliza integração. |
 | `RAFAELIA_*` (raiz + docs) | `/docs/06-rafalelia/` | Evita dispersão. |
 | `QEMU_IMPROVEMENTS_README.md` | `/docs/04-processes/` | Padronização de processo. |
+| `analysis_reports/qemu_rafaelia/*` | `/docs/01-overview/` (ou `/docs/reports/`) | Mantém relatórios navegáveis. |
 
 ### Ganhos esperados
-- Navegação consistente.
+- Navegação consistente e rastreável.
 - Revisões mais rápidas.
 - Menor risco de documentação desatualizada.
 
@@ -119,6 +168,7 @@ flowchart TD
 - **Risco**: lockfile v4 exige Cargo novo —> definir versão mínima.
 - **Governança**: exigir atualização do lockfile apenas via CI/bots.
 - **Dependências**: mapear crates críticos e suas licenças.
+- **Documentação**: consolidar o índice profissional como fonte oficial de navegação.
 
 ## MVPs e roadmap
 1. **MVP 1 — Documentação unificada**
@@ -126,7 +176,7 @@ flowchart TD
 2. **MVP 2 — Benchmark automatizado**
    - Pipeline de comparação de builds.
 3. **MVP 3 — Índice navegável**
-   - Index único dos documentos com clusters.
+   - Índice único dos documentos com clusters e personas.
 
 ## Anexos
 - Arquitetura detalhada: `ARCH_REPORT_qemu_rafaelia.md`

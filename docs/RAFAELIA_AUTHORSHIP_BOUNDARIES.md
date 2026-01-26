@@ -43,6 +43,7 @@ Os módulos abaixo são considerados **RAFAELIA authored** e devem estar no
 **ModulomR**:
 
 - **RAFAELIA_BOOTBLOCK_v1** → `hw/core/rafaelia-core.*`
+- **RAFAELIA_RUNTIME_HOOK** → `include/hw/core/rafaelia-runtime.h`, `hw/core/rafaelia-runtime.c`, `system/vl.c`, `hw/core/trace-events`
 - **RAFAELIA_INTEGRATION** → `include/hw/core/rafaelia-integration.h`
 - **RAFAELIA_RMR** → `include/hw/core/rafaelia-rmr*.h`, `hw/core/rafaelia-rmr*.c`
 - **RAFAELIA_MVP_MODULES** → `include/hw/core/rafaelia-mvp-modules.h`
@@ -75,4 +76,3 @@ Os módulos abaixo são considerados **RAFAELIA authored** e devem estar no
 - ModulomR: `docs/RAFAELIA_MODULOMR.md`
 - README principal: `README_RAFAELIA.md`
 - Documentação técnica: `docs/RAFAELIA_TECHNICAL_DOCUMENTATION.md`
-

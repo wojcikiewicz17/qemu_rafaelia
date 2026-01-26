@@ -5533,14 +5533,14 @@ SRST
 ERST
 
 DEF("rafaelia", HAS_ARG, QEMU_OPTION_rafaelia,
-    "-rafaelia [on|off][,tick_ms=ms][,mode=MODE][,debug=on|off]\n"
+    "-rafaelia enable=on|off[,mode=0..N][,tick_ms=ms][,debug=0|1]\n"
     "                enable RAFAELIA runtime hook\n",
     QEMU_ARCH_ALL)
 SRST
-``-rafaelia [on|off][,tick_ms=ms][,mode=MODE][,debug=on|off]``
+``-rafaelia enable=on|off[,mode=0..N][,tick_ms=ms][,debug=0|1]``
     Enable the RAFAELIA runtime hook. ``tick_ms`` sets the runtime loop
     cadence, ``mode`` selects the runtime mode (silent, log, trace,
-    symbiosis, audit, bench), and ``debug=on`` enables verbose logging.
+    symbiosis, audit, bench), and ``debug=1`` enables verbose logging.
 ERST
 
 DEF("dump-vmstate", HAS_ARG, QEMU_OPTION_dump_vmstate,

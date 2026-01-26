@@ -392,8 +392,10 @@ int main(void)
     printf("╚═══════════════════════════════════════════════════════╝\n");
     
     /* Initialize RAFAELIA core */
+    rafaelia_context_t ctx;
     rafaelia_core_t core;
-    rafaelia_fiat_portal_init(&core);
+    rafaelia_context_init(&ctx);
+    rafaelia_fiat_portal_init(&ctx, &core);
     
     /* Initialize integration hub */
     rafaelia_integration_hub_t hub;
@@ -413,7 +415,8 @@ int main(void)
     print_separator("Cleanup");
     rafaelia_integration_hub_stop(&hub);
     rafaelia_integration_hub_cleanup(&hub);
-    rafaelia_core_cleanup(&core);
+    rafaelia_core_cleanup(&ctx, &core);
+    rafaelia_context_cleanup(&ctx);
     printf("Integration hub cleaned up successfully.\n");
     
     printf("\n");

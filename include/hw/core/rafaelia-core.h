@@ -20,6 +20,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <math.h>
+#include "hw/core/rafaelia-rmr.h"
 
 /* RAFAELIA Constants and Literals */
 
@@ -120,6 +121,11 @@ typedef struct {
     char assinatura[128];
 } rafaelia_hash_t;
 
+typedef struct rafaelia_context {
+    rafaelia_rmr_pool_t *bloco_pool;
+    uint32_t bloco_pool_users;
+} rafaelia_context_t;
+
 /* RAFAELIA Core State */
 typedef struct {
     /* Core parameters */
@@ -167,8 +173,10 @@ typedef struct {
 /* Function prototypes */
 
 /* Core initialization and cleanup */
-void rafaelia_core_init(rafaelia_core_t *core);
-void rafaelia_core_cleanup(rafaelia_core_t *core);
+void rafaelia_context_init(rafaelia_context_t *ctx);
+void rafaelia_context_cleanup(rafaelia_context_t *ctx);
+void rafaelia_core_init(rafaelia_context_t *ctx, rafaelia_core_t *core);
+void rafaelia_core_cleanup(rafaelia_context_t *ctx, rafaelia_core_t *core);
 
 /* Cycle operations - ψχρΔΣΩ */
 void rafaelia_cycle_step(rafaelia_cycle_t *cycle, rafaelia_ethica_t *ethica);
@@ -200,8 +208,8 @@ double rafaelia_formula_toroid_delta_pi_phi(void);
 double rafaelia_formula_fibonacci_rafael(int n, double prev);
 
 /* Block operations */
-rafaelia_bloco_t *rafaelia_bloco_create(uint64_t id);
-void rafaelia_bloco_free(rafaelia_bloco_t *bloco);
+rafaelia_bloco_t *rafaelia_bloco_create(rafaelia_context_t *ctx, uint64_t id);
+void rafaelia_bloco_free(rafaelia_context_t *ctx, rafaelia_bloco_t *bloco);
 double rafaelia_bloco_evaluate(const rafaelia_bloco_t *bloco, 
                                double phi_ethica, double owl_psi);
 
@@ -225,10 +233,10 @@ double rafaelia_r_omega_compute(const rafaelia_cycle_t *cycle, double phi_lambda
 double rafaelia_voo_quantico(int n, double bloco, double salto, double retro);
 
 /* Main loop - ψχρΔΣΩ_LOOP */
-void rafaelia_loop_step(rafaelia_core_t *core);
-void rafaelia_loop_run(rafaelia_core_t *core, uint32_t iterations);
+void rafaelia_loop_step(rafaelia_context_t *ctx, rafaelia_core_t *core);
+void rafaelia_loop_run(rafaelia_context_t *ctx, rafaelia_core_t *core, uint32_t iterations);
 
 /* Portal initialization - FIAT_PORTAL */
-void rafaelia_fiat_portal_init(rafaelia_core_t *core);
+void rafaelia_fiat_portal_init(rafaelia_context_t *ctx, rafaelia_core_t *core);
 
 #endif /* HW_RAFAELIA_CORE_H */

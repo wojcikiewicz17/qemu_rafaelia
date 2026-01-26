@@ -2,19 +2,19 @@
  * RAFAELIA Symbiosis Unit Tests
  * Test suite for mathematical calculations and data structures
  * 
- * Build: gcc -o test hw/core/rafaelia-symbiosis.c hw/core/rafaelia-symbiosis-test.c -lm
+ * Build: gcc -o test hw/core/rafaelia-symbiosis.c hw/core/rafaelia-rmr-lowlevel.c hw/core/rafaelia-symbiosis-test.c -lm
  * 
  * FIAT LUX ΣΩΔΦBITRAF 💎
  */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 #include <assert.h>
 
 /* Include the header for type definitions and function declarations */
 #include "rafaelia-symbiosis.h"
+#include "hw/core/rafaelia-rmr-lowlevel.h"
 
 #define TEST_EPSILON 1e-10
 #define TEST_PASS() printf("  ✓ PASS\n")
@@ -204,7 +204,10 @@ static int test_torus_entropy(void)
     
     /* Test with uniform data (low entropy) */
     uint8_t uniform_data[64];
-    memset(uniform_data, 0xAA, sizeof(uniform_data));
+    rafaelia_rmr_memzero(uniform_data, sizeof(uniform_data));
+    for (int i = 0; i < (int)sizeof(uniform_data); i++) {
+        uniform_data[i] = 0xAA;
+    }
     torus_compute_hash_entropy(&torus, uniform_data, sizeof(uniform_data));
     
     /* Uniform data should have zero entropy */

@@ -9,9 +9,9 @@
  */
 
 #include "hw/core/rafaelia-mvp-modules.h"
-#include <string.h>
+#include "hw/core/rafaelia-rmr-lowlevel.h"
 #include <math.h>
-#include <time.h>
+#include <stdio.h>
 
 /*
  * ═══════════════════════════════════════════════════════════════════════════
@@ -614,8 +614,11 @@ int rafaelia_context_create(rafaelia_module_context_t *ctx, uint64_t session_id)
         return MVP_ERROR_INVALID_PARAMETER;
     }
     
-    memset(ctx, 0, sizeof(*ctx));
-    ctx->context_id = (uint64_t)time(NULL) ^ session_id;
+    rafaelia_rmr_memzero(ctx, sizeof(*ctx));
+    rafaelia_rmr_rng_seed((uint32_t)session_id);
+    ctx->context_id = ((uint64_t)rafaelia_rmr_rng_next() << 32)
+                      | rafaelia_rmr_rng_next();
+    ctx->context_id ^= session_id;
     ctx->session_id = session_id;
     ctx->amor = 1.0;
     ctx->coerencia = 1.0;
@@ -631,7 +634,7 @@ int rafaelia_context_destroy(rafaelia_module_context_t *ctx)
         return MVP_ERROR_INVALID_PARAMETER;
     }
     
-    memset(ctx, 0, sizeof(*ctx));
+    rafaelia_rmr_memzero(ctx, sizeof(*ctx));
     return MVP_SUCCESS;
 }
 
@@ -651,7 +654,7 @@ int rafaelia_registry_init(rafaelia_module_registry_t *registry)
         return MVP_ERROR_ALREADY_INITIALIZED;
     }
     
-    memset(registry, 0, sizeof(*registry));
+    rafaelia_rmr_memzero(registry, sizeof(*registry));
     registry->initialized = true;
     registry->system_phi_ethica = 1.0;
     registry->system_health = 1.0;
@@ -679,7 +682,7 @@ int rafaelia_registry_shutdown(rafaelia_module_registry_t *registry)
         }
     }
     
-    memset(registry, 0, sizeof(*registry));
+    rafaelia_rmr_memzero(registry, sizeof(*registry));
     return MVP_SUCCESS;
 }
 
@@ -787,13 +790,14 @@ int rafaelia_module_init_default(rafaelia_mvp_module_t *module,
         return MVP_ERROR_INVALID_PARAMETER;
     }
     
-    memset(module, 0, sizeof(*module));
+    rafaelia_rmr_memzero(module, sizeof(*module));
     
     const rafaelia_module_info_t *info = &g_module_info[id];
     
     module->id = id;
-    strncpy(module->name, info->name, MODULE_MAX_NAME_LENGTH - 1);
-    strncpy(module->description, info->short_description, MODULE_MAX_DESCRIPTION_LENGTH - 1);
+    rafaelia_rmr_strlcpy(module->name, info->name, MODULE_MAX_NAME_LENGTH);
+    rafaelia_rmr_strlcpy(module->description, info->short_description,
+                         MODULE_MAX_DESCRIPTION_LENGTH);
     module->version.major = RAFAELIA_MVP_VERSION_MAJOR;
     module->version.minor = RAFAELIA_MVP_VERSION_MINOR;
     module->version.patch = RAFAELIA_MVP_VERSION_PATCH;
@@ -900,7 +904,7 @@ int rafaelia_module_reset(rafaelia_mvp_module_t *module)
     }
     
     /* Reset metrics */
-    memset(&module->metrics, 0, sizeof(module->metrics));
+    rafaelia_rmr_memzero(&module->metrics, sizeof(module->metrics));
     module->metrics.phi_ethica_score = 1.0;
     module->metrics.owl_psi_score = 1.0;
     module->metrics.coherence_score = 1.0;
@@ -1107,10 +1111,12 @@ int rafaelia_aggregate_create(rafaelia_module_registry_t *registry,
         return MVP_ERROR_INVALID_PARAMETER;
     }
     
-    memset(aggregate, 0, sizeof(*aggregate));
-    
-    aggregate->aggregate_id = (uint64_t)time(NULL);
-    strncpy(aggregate->name, name, MODULE_MAX_NAME_LENGTH - 1);
+    rafaelia_rmr_memzero(aggregate, sizeof(*aggregate));
+
+    rafaelia_rmr_rng_seed((uint32_t)rafaelia_rmr_strlen(name));
+    aggregate->aggregate_id = ((uint64_t)rafaelia_rmr_rng_next() << 32)
+                              | rafaelia_rmr_rng_next();
+    rafaelia_rmr_strlcpy(aggregate->name, name, MODULE_MAX_NAME_LENGTH);
     
     /* Copy module IDs */
     for (uint32_t i = 0; i < count; i++) {
@@ -1140,7 +1146,7 @@ int rafaelia_aggregate_destroy(rafaelia_module_aggregate_t *aggregate)
         return MVP_ERROR_INVALID_PARAMETER;
     }
     
-    memset(aggregate, 0, sizeof(*aggregate));
+    rafaelia_rmr_memzero(aggregate, sizeof(*aggregate));
     return MVP_SUCCESS;
 }
 

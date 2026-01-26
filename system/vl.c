@@ -3701,8 +3701,8 @@ void qemu_init(int argc, char **argv)
                     qemu_opt_get_bool(opts, "enable", true);
                 tick_ms = qemu_opt_get_number(opts, "tick_ms",
                                               rafaelia_runtime_config.tick_ms);
-                if (tick_ms > UINT32_MAX) {
-                    error_report("RAFAELIA tick_ms out of range");
+                if (tick_ms < 1 || tick_ms > 10000) {
+                    error_report("RAFAELIA tick_ms must be between 1 and 10000");
                     exit(1);
                 }
                 rafaelia_runtime_config.tick_ms = (uint32_t)tick_ms;

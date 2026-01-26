@@ -16,8 +16,13 @@
 
 #define RAFAELIA_RUNTIME_TICK_CAP 100u
 
+/*
+ * RAFAELIA runtime state is owned by the main loop thread.
+ * Access from other threads must be serialized by the main loop.
+ */
 typedef struct rafaelia_runtime_state {
     rafaelia_runtime_config_t config;
+    rafaelia_context_t context;
     rafaelia_core_t core;
     rafaelia_integration_hub_t hub;
     bool hub_initialized;
@@ -109,6 +114,9 @@ static void rafaelia_runtime_sanitize_config(rafaelia_runtime_config_t *config)
     if (config->tick_ms == 0) {
         config->tick_ms = 1;
     }
+    if (config->tick_ms > 10000) {
+        config->tick_ms = 10000;
+    }
 }
 
 void rafaelia_runtime_set_config(const rafaelia_runtime_config_t *config)
@@ -163,7 +171,7 @@ static void rafaelia_runtime_log_state_change(const rafaelia_runtime_state_t *st
 
 static void rafaelia_runtime_tick_once(rafaelia_runtime_state_t *state)
 {
-    rafaelia_loop_step(&state->core);
+    rafaelia_loop_step(&state->context, &state->core);
     state->ticks_total++;
     state->entropy_last = rafaelia_cycle_measure(&state->core.cycle);
     state->coherence_last = state->core.phi_ethica.coerencia;
@@ -264,7 +272,8 @@ void rafaelia_runtime_init(void)
         return;
     }
 
-    rafaelia_fiat_portal_init(&state->core);
+    rafaelia_context_init(&state->context);
+    rafaelia_fiat_portal_init(&state->context, &state->core);
     hub_rc = rafaelia_integration_hub_init(&state->hub, &state->core);
     if (hub_rc == 0) {
         state->hub_initialized = true;
@@ -349,6 +358,7 @@ void rafaelia_runtime_shutdown(void)
         state->hub_initialized = false;
     }
 
-    rafaelia_core_cleanup(&state->core);
+    rafaelia_core_cleanup(&state->context, &state->core);
+    rafaelia_context_cleanup(&state->context);
     state->initialized = false;
 }

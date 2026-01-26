@@ -49,17 +49,19 @@ static double rafaelia_ethical_resource_score(
  */
 static void rafaelia_adaptive_learning_example(void)
 {
+    rafaelia_context_t ctx;
     rafaelia_core_t core;
     
     printf("\n=== RAFAELIA Adaptive Learning Example ===\n\n");
     
     /* Initialize the core */
-    rafaelia_fiat_portal_init(&core);
+    rafaelia_context_init(&ctx);
+    rafaelia_fiat_portal_init(&ctx, &core);
     
     /* Simulate 20 learning iterations */
     printf("Running 20 learning iterations...\n");
     for (int i = 0; i < 20; i++) {
-        rafaelia_loop_step(&core);
+        rafaelia_loop_step(&ctx, &core);
         
         if (i % 5 == 0) {
             printf("  Iteration %2d: Memory=%.6f, Completeness=%.6f, R_Ω=%.6f\n",
@@ -73,7 +75,8 @@ static void rafaelia_adaptive_learning_example(void)
     printf("  Amor_Vivo:         %.6f\n", core.amor_vivo);
     printf("  Wisdom (OWLψ):     %.6f\n", core.owl_psi);
     
-    rafaelia_core_cleanup(&core);
+    rafaelia_core_cleanup(&ctx, &core);
+    rafaelia_context_cleanup(&ctx);
 }
 
 /*
@@ -84,17 +87,19 @@ static void rafaelia_adaptive_learning_example(void)
  */
 static void rafaelia_knowledge_blocks_example(void)
 {
+    rafaelia_context_t ctx;
     rafaelia_core_t core;
     
     printf("\n=== RAFAELIA Knowledge Blocks Example ===\n\n");
     
-    rafaelia_fiat_portal_init(&core);
+    rafaelia_context_init(&ctx);
+    rafaelia_fiat_portal_init(&ctx, &core);
     
     /* Create multiple knowledge blocks */
     printf("Creating knowledge blocks...\n");
     
     for (int i = 1; i <= 5; i++) {
-        rafaelia_bloco_t *bloco = rafaelia_bloco_create(i);
+        rafaelia_bloco_t *bloco = rafaelia_bloco_create(&ctx, i);
         
         if (bloco) {
             /* Set some sample coefficients and attitudes */
@@ -119,11 +124,12 @@ static void rafaelia_knowledge_blocks_example(void)
             snprintf(bloco->acoes_futuras, sizeof(bloco->acoes_futuras),
                     "Expand and refine based on retroalimentation");
             
-            rafaelia_bloco_free(bloco);
+            rafaelia_bloco_free(&ctx, bloco);
         }
     }
     
-    rafaelia_core_cleanup(&core);
+    rafaelia_core_cleanup(&ctx, &core);
+    rafaelia_context_cleanup(&ctx);
 }
 
 /*

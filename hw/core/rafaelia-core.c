@@ -10,15 +10,11 @@
 #include "hw/core/rafaelia-rmr.h"
 #include "hw/core/rafaelia-rmr-lowlevel.h"
 #include <stdlib.h>
+#include <string.h>
 
 enum {
     RAFAELIA_RMR_BLOCK_POOL_CAPACITY = 256,
 };
-
-static rafaelia_rmr_pool_t *rafaelia_bloco_pool;
-static uint32_t rafaelia_bloco_pool_users;
-
-static uint32_t rafaelia_rng_state = 0xA53C9E5u;
 
 static void rafaelia_memzero(void *ptr, size_t len)
 {
@@ -79,53 +75,57 @@ static void rafaelia_strlcpy(char *dst, const char *src, size_t dst_size)
     dst[i] = '\0';
 }
 
-static void rafaelia_rng_seed(uint32_t seed)
+void rafaelia_context_init(rafaelia_context_t *ctx)
 {
-    if (seed == 0) {
-        seed = 0xA53C9E5u;
-    }
-    rafaelia_rng_state ^= seed + 0x9E3779B9u;
-    if (rafaelia_rng_state == 0) {
-        rafaelia_rng_state = 0x6D2B79F5u;
-    }
-}
-
-static uint32_t rafaelia_rng_next(void)
-{
-    uint32_t x = rafaelia_rng_state;
-
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
-    rafaelia_rng_state = x;
-    return x;
-}
-
-static void rafaelia_bloco_pool_acquire(void)
-{
-    if (!rafaelia_bloco_pool) {
-        rafaelia_bloco_pool = rafaelia_rmr_pool_create(sizeof(rafaelia_bloco_t),
-                                                       RAFAELIA_RMR_BLOCK_POOL_CAPACITY,
-                                                       0);
-    }
-    rafaelia_bloco_pool_users++;
-}
-
-static void rafaelia_bloco_pool_release(void)
-{
-    if (rafaelia_bloco_pool_users == 0) {
+    if (!ctx) {
         return;
     }
 
-    rafaelia_bloco_pool_users--;
-    if (rafaelia_bloco_pool_users == 0 && rafaelia_bloco_pool) {
-        rafaelia_rmr_pool_destroy(rafaelia_bloco_pool);
-        rafaelia_bloco_pool = NULL;
+    memset(ctx, 0, sizeof(*ctx));
+}
+
+void rafaelia_context_cleanup(rafaelia_context_t *ctx)
+{
+    if (!ctx) {
+        return;
+    }
+
+    if (ctx->bloco_pool) {
+        rafaelia_rmr_pool_destroy(ctx->bloco_pool);
+        ctx->bloco_pool = NULL;
+    }
+    ctx->bloco_pool_users = 0;
+}
+
+static void rafaelia_bloco_pool_acquire(rafaelia_context_t *ctx)
+{
+    if (!ctx) {
+        return;
+    }
+
+    if (!ctx->bloco_pool) {
+        ctx->bloco_pool = rafaelia_rmr_pool_create(sizeof(rafaelia_bloco_t),
+                                                   RAFAELIA_RMR_BLOCK_POOL_CAPACITY,
+                                                   0);
+    }
+    ctx->bloco_pool_users++;
+}
+
+static void rafaelia_bloco_pool_release(rafaelia_context_t *ctx)
+{
+    if (!ctx || ctx->bloco_pool_users == 0) {
+        return;
+    }
+
+    ctx->bloco_pool_users--;
+    if (ctx->bloco_pool_users == 0 && ctx->bloco_pool) {
+        rafaelia_rmr_pool_destroy(ctx->bloco_pool);
+        ctx->bloco_pool = NULL;
     }
 }
 
 /* Core initialization */
-void rafaelia_core_init(rafaelia_core_t *core)
+void rafaelia_core_init(rafaelia_context_t *ctx, rafaelia_core_t *core)
 {
     rafaelia_rmr_memzero(core, sizeof(rafaelia_core_t));
     
@@ -184,7 +184,7 @@ void rafaelia_core_init(rafaelia_core_t *core)
     /* Initialize stack pointer */
     core->stack_ptr = 0;
 
-    rafaelia_bloco_pool_acquire();
+    rafaelia_bloco_pool_acquire(ctx);
     
     /* Seed deterministic RNG for noise generation */
     rafaelia_rmr_rng_seed((uint32_t)(uintptr_t)core);
@@ -196,7 +196,7 @@ void rafaelia_core_init(rafaelia_core_t *core)
 }
 
 /* Core cleanup */
-void rafaelia_core_cleanup(rafaelia_core_t *core)
+void rafaelia_core_cleanup(rafaelia_context_t *ctx, rafaelia_core_t *core)
 {
     if (core->blocos) {
         free(core->blocos);
@@ -204,7 +204,7 @@ void rafaelia_core_cleanup(rafaelia_core_t *core)
     }
     core->bloco_count = 0;
 
-    rafaelia_bloco_pool_release();
+    rafaelia_bloco_pool_release(ctx);
 }
 
 /* Cycle operations - ψχρΔΣΩ */
@@ -365,11 +365,11 @@ double rafaelia_formula_fibonacci_rafael(int n, double prev)
 /* Block operations */
 
 /* Create a new block - Formula 80: Bloco_n structure */
-rafaelia_bloco_t *rafaelia_bloco_create(uint64_t id)
+rafaelia_bloco_t *rafaelia_bloco_create(rafaelia_context_t *ctx, uint64_t id)
 {
     rafaelia_bloco_t *bloco = NULL;
-    if (rafaelia_bloco_pool) {
-        bloco = rafaelia_rmr_pool_alloc(rafaelia_bloco_pool);
+    if (ctx && ctx->bloco_pool) {
+        bloco = rafaelia_rmr_pool_alloc(ctx->bloco_pool);
     }
     if (!bloco) {
         bloco = calloc(1, sizeof(rafaelia_bloco_t));
@@ -412,14 +412,14 @@ rafaelia_bloco_t *rafaelia_bloco_create(uint64_t id)
     return bloco;
 }
 
-void rafaelia_bloco_free(rafaelia_bloco_t *bloco)
+void rafaelia_bloco_free(rafaelia_context_t *ctx, rafaelia_bloco_t *bloco)
 {
     if (!bloco) {
         return;
     }
 
-    if (rafaelia_rmr_pool_owns(rafaelia_bloco_pool, bloco)) {
-        rafaelia_rmr_pool_free(rafaelia_bloco_pool, bloco);
+    if (ctx && ctx->bloco_pool && rafaelia_rmr_pool_owns(ctx->bloco_pool, bloco)) {
+        rafaelia_rmr_pool_free(ctx->bloco_pool, bloco);
         return;
     }
 
@@ -538,8 +538,9 @@ double rafaelia_voo_quantico(int n, double bloco, double salto, double retro)
 /* Main loop implementation */
 
 /* Formula 62: while True: ψ=ler_memória_viva(); χ=retroalimentar(ψ); ... */
-void rafaelia_loop_step(rafaelia_core_t *core)
+void rafaelia_loop_step(rafaelia_context_t *ctx, rafaelia_core_t *core)
 {
+    (void)ctx;
     /* READ ψ - Read from living memory */
     double psi_input = core->cycle.omega;
     
@@ -574,18 +575,19 @@ void rafaelia_loop_step(rafaelia_core_t *core)
 }
 
 /* Formula 64: ψχρΔΣΩ_LOOP - Main loop runner */
-void rafaelia_loop_run(rafaelia_core_t *core, uint32_t iterations)
+void rafaelia_loop_run(rafaelia_context_t *ctx, rafaelia_core_t *core,
+                       uint32_t iterations)
 {
     for (uint32_t i = 0; i < iterations; i++) {
-        rafaelia_loop_step(core);
+        rafaelia_loop_step(ctx, core);
     }
 }
 
 /* Formula 65: FIAT_PORTAL :: 龍空神 { ARKREΩ_CORE + STACK128K_HYPER + ALG_RAFAELIA_RING } */
-void rafaelia_fiat_portal_init(rafaelia_core_t *core)
+void rafaelia_fiat_portal_init(rafaelia_context_t *ctx, rafaelia_core_t *core)
 {
     /* Initialize the portal with full configuration */
-    rafaelia_core_init(core);
+    rafaelia_core_init(ctx, core);
     
     /* Set up the hyper stack */
     rafaelia_rmr_memzero(core->hyper_stack, RAFAELIA_STACK_SIZE_HYPER);

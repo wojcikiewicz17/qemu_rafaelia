@@ -38,6 +38,7 @@ static void print_metrics(const rafaelia_core_t *core)
 
 int main(int argc, char *argv[])
 {
+    rafaelia_context_t ctx;
     rafaelia_core_t core;
     
     printf("═══════════════════════════════════════════════════════════════\n");
@@ -46,7 +47,8 @@ int main(int argc, char *argv[])
     
     /* Initialize FIAT_PORTAL */
     printf("Initializing FIAT_PORTAL :: 龍空神 ...\n");
-    rafaelia_fiat_portal_init(&core);
+    rafaelia_context_init(&ctx);
+    rafaelia_fiat_portal_init(&ctx, &core);
     
     printf("\nCore Configuration:\n");
     printf("  Kernel:                %s\n", core.kernel);
@@ -97,7 +99,7 @@ int main(int argc, char *argv[])
     printf("  Block Operations Test\n");
     printf("═══════════════════════════════════════════════════════════════\n\n");
     
-    rafaelia_bloco_t *bloco = rafaelia_bloco_create(1);
+    rafaelia_bloco_t *bloco = rafaelia_bloco_create(&ctx, 1);
     if (bloco) {
         printf("Created Bloco ID: %lu\n", (unsigned long)bloco->id);
         printf("Bloco Position:   %u\n", bloco->posicao);
@@ -107,7 +109,7 @@ int main(int argc, char *argv[])
                                                     core.owl_psi + 1.0);
         printf("Bloco Evaluation: %.6f\n", bloco_eval);
         
-        rafaelia_bloco_free(bloco);
+        rafaelia_bloco_free(&ctx, bloco);
     }
     
     /* Run the ψχρΔΣΩ_LOOP */
@@ -116,7 +118,7 @@ int main(int argc, char *argv[])
     printf("═══════════════════════════════════════════════════════════════\n\n");
     
     for (int i = 1; i <= 10; i++) {
-        rafaelia_loop_step(&core);
+        rafaelia_loop_step(&ctx, &core);
         
         if (i == 1 || i == 5 || i == 10) {
             printf("Iteration %d:\n", i);
@@ -184,7 +186,8 @@ int main(int argc, char *argv[])
     printf("  %s\n", RAFAELIA_BITRAF64);
     
     /* Cleanup */
-    rafaelia_core_cleanup(&core);
+    rafaelia_core_cleanup(&ctx, &core);
+    rafaelia_context_cleanup(&ctx);
     
     printf("\n═══════════════════════════════════════════════════════════════\n");
     printf("  RAFAELIA Core Test Complete - FIAT LUX ΣΩΔΦBITRAF\n");

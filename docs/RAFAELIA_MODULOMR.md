@@ -34,7 +34,8 @@ serve como referência para documentação, revisão de licenças e histórico d
 contribuições.
 
 Entradas autorais recentes incluem o **RAFAELIA_RMR**, focado em reduzir
-overhead de alocação e expor perfil de hardware para otimizações low-level. A
+overhead de alocação e expor perfil de hardware para otimizações low-level,
+incluindo caminhos de alocação sem zero-initialize para estruturas hot. A
 documentação técnica do módulo está em `docs/RAFAELIA_RMR.md`.
 
 ---

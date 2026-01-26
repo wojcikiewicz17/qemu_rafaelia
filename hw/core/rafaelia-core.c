@@ -369,7 +369,7 @@ rafaelia_bloco_t *rafaelia_bloco_create(rafaelia_context_t *ctx, uint64_t id)
 {
     rafaelia_bloco_t *bloco = NULL;
     if (ctx && ctx->bloco_pool) {
-        bloco = rafaelia_rmr_pool_alloc(ctx->bloco_pool);
+        bloco = rafaelia_rmr_pool_alloc_uninitialized(ctx->bloco_pool);
     }
     if (!bloco) {
         bloco = calloc(1, sizeof(rafaelia_bloco_t));
@@ -381,6 +381,8 @@ rafaelia_bloco_t *rafaelia_bloco_create(rafaelia_context_t *ctx, uint64_t id)
     bloco->id = id;
     bloco->posicao = 0;
     bloco->estado = 1; /* Active state */
+    bloco->observacoes[0] = '\0';
+    bloco->acoes_futuras[0] = '\0';
     
     /* Initialize coefficients and attitudes to unity */
     {

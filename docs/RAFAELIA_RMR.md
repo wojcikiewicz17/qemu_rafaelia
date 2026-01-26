@@ -41,6 +41,8 @@ O MVP do RMR inclui:
   `calloc` quando necessário.
 - Detecção simples de arquitetura, cache line e tamanho de página.
 - Função de prefetch compatível com GCC/Clang.
+- Opção de alocação sem zero-initialize para caminhos hot que inicializam
+  manualmente os campos.
 
 Esse conjunto permite ganhos imediatos em cenários com alto churn de blocos,
 sem alterar a API pública do core.
@@ -70,6 +72,7 @@ rafaelia_rmr_pool_t *rafaelia_rmr_pool_create(size_t element_size,
                                               uint32_t alignment);
 void rafaelia_rmr_pool_destroy(rafaelia_rmr_pool_t *pool);
 void *rafaelia_rmr_pool_alloc(rafaelia_rmr_pool_t *pool);
+void *rafaelia_rmr_pool_alloc_uninitialized(rafaelia_rmr_pool_t *pool);
 void rafaelia_rmr_pool_free(rafaelia_rmr_pool_t *pool, void *ptr);
 bool rafaelia_rmr_pool_owns(const rafaelia_rmr_pool_t *pool, const void *ptr);
 void rafaelia_rmr_detect(rafaelia_rmr_hw_profile_t *profile);
@@ -89,12 +92,18 @@ Essa integração é transparente ao usuário do core.
 - O pool usa free list LIFO para baixo overhead.
 - O alinhamento padrão segue `qemu_dcache_linesize` quando disponível.
 - Prefetch é opcional (GCC/Clang), sem custo em outros compiladores.
+- `rafaelia_rmr_pool_alloc_uninitialized()` evita o zero-initialize completo do
+  bloco; use apenas quando todos os campos necessários forem inicializados
+  explicitamente pelo chamador.
 
 ## Licenciamento e autoria
 
 O RMR **não introduz nova licença**. Ele segue o licenciamento do repositório
 (`COPYING`, `COPYING.LIB`) e as diretrizes do ModulomR. **Não é permitido**
 aplicar licenças pessoais ou proprietárias ao módulo.
+
+Notas autorais específicas do RMR ficam em `RMR/README.md`, mantendo o histórico
+de decisões de performance e integração.
 
 ## Checklist de manutenção
 

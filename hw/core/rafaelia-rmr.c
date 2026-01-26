@@ -5,6 +5,7 @@
 #include "qemu/osdep.h"
 #include "qemu/cacheinfo.h"
 #include "hw/core/rafaelia-rmr.h"
+#include "hw/core/rafaelia-rmr-lowlevel.h"
 
 static size_t rafaelia_rmr_round_up(size_t value, size_t align)
 {
@@ -88,7 +89,7 @@ void *rafaelia_rmr_pool_alloc(rafaelia_rmr_pool_t *pool)
     entry = pool->free_list;
     pool->free_list = *(void **)entry;
     pool->in_use++;
-    memset(entry, 0, pool->element_size);
+    rafaelia_rmr_memzero(entry, pool->element_size);
     return entry;
 }
 
@@ -127,7 +128,7 @@ void rafaelia_rmr_detect(rafaelia_rmr_hw_profile_t *profile)
         return;
     }
 
-    memset(profile, 0, sizeof(*profile));
+    rafaelia_rmr_memzero(profile, sizeof(*profile));
 
 #if defined(__x86_64__) || defined(_M_X64)
     profile->arch = "x86_64";

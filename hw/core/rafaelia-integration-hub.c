@@ -6,9 +6,9 @@
  */
 
 #include "hw/core/rafaelia-integration.h"
+#include "hw/core/rafaelia-rmr-lowlevel.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 #include <math.h>
 
@@ -84,7 +84,7 @@ int rafaelia_integration_hub_init(rafaelia_integration_hub_t *hub, rafaelia_core
         return -1;
     }
     
-    memset(hub, 0, sizeof(*hub));
+    rafaelia_rmr_memzero(hub, sizeof(*hub));
     hub->core = core;
     hub->initialized = true;
     
@@ -209,8 +209,7 @@ int rafaelia_integration_connect_repository(rafaelia_integration_hub_t *hub,
     rafaelia_connector_t *conn = &hub->connectors[repo_id];
     
     /* Store endpoint */
-    strncpy(conn->endpoint, endpoint, sizeof(conn->endpoint) - 1);
-    conn->endpoint[sizeof(conn->endpoint) - 1] = '\0';
+    rafaelia_rmr_strlcpy(conn->endpoint, endpoint, sizeof(conn->endpoint));
     
     /* Attempt connection */
     conn->status = STATUS_CONNECTING;

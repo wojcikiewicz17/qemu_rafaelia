@@ -6,7 +6,7 @@ CFLAGS = -I../../include -I. -Wall -Wextra -O2 -g
 LDFLAGS = -lm -lpthread
 
 # Source files
-CORE_SRCS = rafaelia-core.c rafaelia-matrix-core.c
+CORE_SRCS = rafaelia-core.c rafaelia-matrix-core.c rafaelia-rmr-lowlevel.c
 INTEGRATION_SRCS = rafaelia-integration-hub.c
 CONNECTOR_SRCS = connectors/userland-connector.c \
                  connectors/magisk-connector.c \
@@ -80,7 +80,8 @@ info:
 .PHONY: all test clean distclean info
 
 # Dependencies
-rafaelia-core.o: rafaelia-core.c ../../include/hw/core/rafaelia-core.h
+rafaelia-core.o: rafaelia-core.c ../../include/hw/core/rafaelia-core.h ../../include/hw/core/rafaelia-rmr-lowlevel.h
+rafaelia-rmr-lowlevel.o: rafaelia-rmr-lowlevel.c ../../include/hw/core/rafaelia-rmr-lowlevel.h
 rafaelia-matrix-core.o: rafaelia-matrix-core.c rafaelia-matrix-core.h
 rafaelia-integration-hub.o: rafaelia-integration-hub.c ../../include/hw/core/rafaelia-integration.h ../../include/hw/core/rafaelia-core.h
 connectors/userland-connector.o: connectors/userland-connector.c ../../include/hw/core/rafaelia-integration.h

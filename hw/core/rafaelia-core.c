@@ -8,10 +8,8 @@
 
 #include "hw/core/rafaelia-core.h"
 #include "hw/core/rafaelia-rmr.h"
+#include "hw/core/rafaelia-rmr-lowlevel.h"
 #include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
 
 enum {
     RAFAELIA_RMR_BLOCK_POOL_CAPACITY = 256,
@@ -46,16 +44,20 @@ static void rafaelia_bloco_pool_release(void)
 /* Core initialization */
 void rafaelia_core_init(rafaelia_core_t *core)
 {
-    memset(core, 0, sizeof(rafaelia_core_t));
+    rafaelia_rmr_memzero(core, sizeof(rafaelia_core_t));
     
     /* Initialize kernel and core strings */
-    strncpy(core->kernel, "ΣΔΩ", sizeof(core->kernel) - 1);
-    strncpy(core->mode, RAFAELIA_MODE_STRING, sizeof(core->mode) - 1);
-    strncpy(core->ethic, RAFAELIA_ETHIC_STRING, sizeof(core->ethic) - 1);
-    strncpy(core->hash_core, RAFAELIA_HASH_CORE_STRING, sizeof(core->hash_core) - 1);
-    strncpy(core->vector_core, RAFAELIA_VECTOR_CORE_STRING, sizeof(core->vector_core) - 1);
-    strncpy(core->cognition, RAFAELIA_COGNITION_STRING, sizeof(core->cognition) - 1);
-    strncpy(core->universe, RAFAELIA_UNIVERSE_STRING, sizeof(core->universe) - 1);
+    rafaelia_rmr_strlcpy(core->kernel, "ΣΔΩ", sizeof(core->kernel));
+    rafaelia_rmr_strlcpy(core->mode, RAFAELIA_MODE_STRING, sizeof(core->mode));
+    rafaelia_rmr_strlcpy(core->ethic, RAFAELIA_ETHIC_STRING, sizeof(core->ethic));
+    rafaelia_rmr_strlcpy(core->hash_core, RAFAELIA_HASH_CORE_STRING,
+                         sizeof(core->hash_core));
+    rafaelia_rmr_strlcpy(core->vector_core, RAFAELIA_VECTOR_CORE_STRING,
+                         sizeof(core->vector_core));
+    rafaelia_rmr_strlcpy(core->cognition, RAFAELIA_COGNITION_STRING,
+                         sizeof(core->cognition));
+    rafaelia_rmr_strlcpy(core->universe, RAFAELIA_UNIVERSE_STRING,
+                         sizeof(core->universe));
     
     /* Initialize cycle - ψχρΔΣΩ with initial values */
     core->cycle.psi = 1.0;
@@ -101,12 +103,13 @@ void rafaelia_core_init(rafaelia_core_t *core)
 
     rafaelia_bloco_pool_acquire();
     
-    /* Seed random number generator for noise generation */
-    srand((unsigned int)time(NULL));
+    /* Seed deterministic RNG for noise generation */
+    rafaelia_rmr_rng_seed((uint32_t)(uintptr_t)core);
     
     /* Initialize hash/signature */
-    strncpy(core->hash_vivo.assinatura, "RAFCODE-Φ-∆RafaelVerboΩ-𓂀ΔΦΩ", 
-            sizeof(core->hash_vivo.assinatura) - 1);
+    rafaelia_rmr_strlcpy(core->hash_vivo.assinatura,
+                         "RAFCODE-Φ-∆RafaelVerboΩ-𓂀ΔΦΩ",
+                         sizeof(core->hash_vivo.assinatura));
 }
 
 /* Core cleanup */
@@ -139,7 +142,7 @@ void rafaelia_cycle_step(rafaelia_cycle_t *cycle, rafaelia_ethica_t *ethica)
     double chi_new = psi_new * (cycle->chi > 0.0 ? cycle->chi : 1.0) * phi;
     
     /* ρ (rho) - Noise: expand from chi with small random perturbation */
-    double noise_factor = 1.0 + (rand() % 100) / 1000.0;
+    double noise_factor = 1.0 + (rafaelia_rmr_rng_next() % 100) / 1000.0;
     double rho_new = chi_new * noise_factor;
     
     /* Δ (delta) - Transmutation: validate rho */
@@ -404,7 +407,7 @@ bool rafaelia_hash_verify(const rafaelia_hash_t *hash, const void *data,
 {
     rafaelia_hash_t computed;
     rafaelia_hash_compute(&computed, data, len);
-    return memcmp(hash->sha3_256, computed.sha3_256, 32) == 0;
+    return rafaelia_rmr_memcmp(hash->sha3_256, computed.sha3_256, 32) == 0;
 }
 
 /* Formula 20: OWLψ = Σ (Insight_n · Ética_n · Fluxo_n) */
@@ -502,14 +505,14 @@ void rafaelia_fiat_portal_init(rafaelia_core_t *core)
     rafaelia_core_init(core);
     
     /* Set up the hyper stack */
-    memset(core->hyper_stack, 0, RAFAELIA_STACK_SIZE_HYPER);
+    rafaelia_rmr_memzero(core->hyper_stack, RAFAELIA_STACK_SIZE_HYPER);
     core->stack_ptr = 0;
     
     /* Initialize with BITRAF64 literal in stack */
     const char *bitraf = RAFAELIA_BITRAF64;
-    size_t bitraf_len = strlen(bitraf);
+    size_t bitraf_len = rafaelia_rmr_strlen(bitraf);
     if (bitraf_len < RAFAELIA_STACK_SIZE_HYPER) {
-        memcpy(core->hyper_stack, bitraf, bitraf_len);
+        rafaelia_rmr_memcpy(core->hyper_stack, bitraf, bitraf_len);
         core->stack_ptr = bitraf_len;
     }
     

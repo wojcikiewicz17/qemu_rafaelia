@@ -1,0 +1,7 @@
+RAFAELIA RMR Lowlevel License
+
+Copyright (c) 2025 Rafaelia.
+All rights reserved.
+
+This file governs the RAFAELIA RMR lowlevel module sources.
+Unauthorized copying or redistribution is prohibited.

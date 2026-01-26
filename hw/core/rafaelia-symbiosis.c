@@ -9,8 +9,8 @@
  */
 
 #include "rafaelia-symbiosis.h"
+#include "hw/core/rafaelia-rmr-lowlevel.h"
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 
 /* Mathematical constants */
@@ -38,7 +38,7 @@ void mandala_init(mandala_state_t *mandala)
 {
     if (!mandala) return;
     
-    memset(mandala, 0, sizeof(mandala_state_t));
+    rafaelia_rmr_memzero(mandala, sizeof(mandala_state_t));
     
     /* Initialize cells with default pattern based on visual reference */
     for (int y = 0; y < MANDALA_SIZE; y++) {
@@ -142,7 +142,7 @@ void rafcode_init(rafcode_state_t *state)
 {
     if (!state) return;
     
-    memset(state, 0, sizeof(rafcode_state_t));
+    rafaelia_rmr_memzero(state, sizeof(rafcode_state_t));
     state->current_stage = RAFCODE_VAZIO;
     state->frequency_hz = FREQ_144KHZ;
     state->verbo_amplitude = 1.0;
@@ -283,7 +283,7 @@ void fractal_memory_init(fractal_memory_t *mem)
 {
     if (!mem) return;
     
-    memset(mem, 0, sizeof(fractal_memory_t));
+    rafaelia_rmr_memzero(mem, sizeof(fractal_memory_t));
     mem->stage = FRACTAL_FORMA_SIMPLES;
     mem->root = create_fractal_node(0.0, 0.0, 0.0, 0);
     mem->total_nodes = 1;
@@ -367,7 +367,7 @@ void sierpinski_musical_init(sierpinski_musical_t *state)
 {
     if (!state) return;
     
-    memset(state, 0, sizeof(sierpinski_musical_t));
+    rafaelia_rmr_memzero(state, sizeof(sierpinski_musical_t));
     state->level = 0;
     state->base_frequency = NOTE_LA;  /* 432 Hz base */
     state->omega_pi_ratio = 1.0;      /* Ω/π ratio */
@@ -417,7 +417,7 @@ void unification_init(unification_state_t *state)
 {
     if (!state) return;
     
-    memset(state, 0, sizeof(unification_state_t));
+    rafaelia_rmr_memzero(state, sizeof(unification_state_t));
     
     /* GU SUR initialization */
     state->gu_sur.theta = 0.0;
@@ -501,7 +501,7 @@ void torus_init(torus_data_t *torus)
 {
     if (!torus) return;
     
-    memset(torus, 0, sizeof(torus_data_t));
+    rafaelia_rmr_memzero(torus, sizeof(torus_data_t));
     
     /* Torus geometry */
     torus->position.major_radius = 2.0;
@@ -616,7 +616,7 @@ void fibonacci_etica_init(fibonacci_etica_t *state)
 {
     if (!state) return;
     
-    memset(state, 0, sizeof(fibonacci_etica_t));
+    rafaelia_rmr_memzero(state, sizeof(fibonacci_etica_t));
     
     /* Pre-compute Fibonacci sequence */
     state->fib_cache[0] = 0;
@@ -685,7 +685,7 @@ void triade_init(triade_matematica_t *triade)
 {
     if (!triade) return;
     
-    memset(triade, 0, sizeof(triade_matematica_t));
+    rafaelia_rmr_memzero(triade, sizeof(triade_matematica_t));
     
     /* Pitágoras - initial values for 1,1 right triangle */
     triade->pitagoras_a2 = 1.0;  /* a² where a=1 */
@@ -748,7 +748,7 @@ void rafaelia_symbiosis_init(rafaelia_symbiosis_t *state)
 {
     if (!state) return;
     
-    memset(state, 0, sizeof(rafaelia_symbiosis_t));
+    rafaelia_rmr_memzero(state, sizeof(rafaelia_symbiosis_t));
     
     /* Initialize all components */
     mandala_init(&state->mandala);
@@ -773,9 +773,9 @@ void rafaelia_symbiosis_init(rafaelia_symbiosis_t *state)
      * are represented correctly. Callers that read output_symbols should treat it
      * as a UTF-8 encoded string.
      */
-    strncpy(state->output_symbols, 
-            "❤♣€ C☯OWL ω I π @BITRAFΦ",
-            sizeof(state->output_symbols) - 1);
+    rafaelia_rmr_strlcpy(state->output_symbols,
+                         "❤♣€ C☯OWL ω I π @BITRAFΦ",
+                         sizeof(state->output_symbols));
 }
 
 void rafaelia_symbiosis_cleanup(rafaelia_symbiosis_t *state)

@@ -7,13 +7,13 @@ LDFLAGS = -lm
 
 TARGET_TEST = rafaelia-core-test
 TARGET_INTEGRATION = rafaelia-core-integration-example
-SOURCES_CORE = rafaelia-core.c rafaelia-rmr.c
+SOURCES_CORE = rafaelia-core.c rafaelia-rmr.c rafaelia-rmr-lowlevel.c
 SOURCES_TEST = rafaelia-core-test.c
 SOURCES_INTEGRATION = rafaelia-core-integration-example.c
 OBJECTS_CORE = $(SOURCES_CORE:.c=.o)
 OBJECTS_TEST = $(SOURCES_TEST:.c=.o)
 OBJECTS_INTEGRATION = $(SOURCES_INTEGRATION:.c=.o)
-HEADERS = ../../include/hw/core/rafaelia-core.h ../../include/hw/core/rafaelia-rmr.h
+HEADERS = ../../include/hw/core/rafaelia-core.h ../../include/hw/core/rafaelia-rmr.h ../../include/hw/core/rafaelia-rmr-lowlevel.h
 
 .PHONY: all clean test integration help
 

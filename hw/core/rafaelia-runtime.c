@@ -8,6 +8,7 @@
 #include "qemu/main-loop.h"
 #include "qemu/notify.h"
 #include "qemu/timer.h"
+#include "crypto/hash.h"
 #include "system/runstate.h"
 #include "hw/core/rafaelia-core.h"
 #include "hw/core/rafaelia-integration.h"
@@ -15,6 +16,9 @@
 #include "trace.h"
 
 #define RAFAELIA_RUNTIME_TICK_CAP 100u
+#define RAFAELIA_RUNTIME_TICK_HISTORY 128u
+#define RAFAELIA_RUNTIME_OVERHEAD_CAP_US 2000u
+#define RAFAELIA_RUNTIME_OVERHEAD_BACKOFF_MAX 6u
 
 typedef struct rafaelia_runtime_state {
     rafaelia_runtime_config_t config;
@@ -24,6 +28,15 @@ typedef struct rafaelia_runtime_state {
     bool initialized;
     bool running;
     uint64_t ticks_total;
+    uint64_t tick_ns_total;
+    uint64_t last_tick_duration_ns;
+    uint64_t tick_ns_history[RAFAELIA_RUNTIME_TICK_HISTORY];
+    size_t tick_ns_index;
+    size_t tick_ns_count;
+    unsigned int overhead_backoff;
+    unsigned int overhead_throttle_count;
+    double tick_avg_us;
+    double tick_p95_us;
     double entropy_last;
     double coherence_last;
     int64_t last_tick_ms;
@@ -34,6 +47,20 @@ typedef struct rafaelia_runtime_state {
 } rafaelia_runtime_state_t;
 
 static rafaelia_runtime_state_t rafaelia_runtime_state;
+
+static int rafaelia_runtime_compare_u64(const void *a, const void *b)
+{
+    uint64_t lhs = *(const uint64_t *)a;
+    uint64_t rhs = *(const uint64_t *)b;
+
+    if (lhs < rhs) {
+        return -1;
+    }
+    if (lhs > rhs) {
+        return 1;
+    }
+    return 0;
+}
 
 rafaelia_runtime_config_t rafaelia_runtime_config_default(void)
 {
@@ -130,6 +157,9 @@ static void rafaelia_runtime_log_tick(const rafaelia_runtime_state_t *state)
     if (state->config.mode == RAFAELIA_RUNTIME_MODE_TRACE ||
         state->config.debug) {
         trace_rafaelia_runtime_tick(state->ticks_total,
+                                    state->last_tick_duration_ns / 1000.0,
+                                    state->tick_avg_us,
+                                    state->tick_p95_us,
                                     state->entropy_last,
                                     state->coherence_last,
                                     state->running,
@@ -139,8 +169,12 @@ static void rafaelia_runtime_log_tick(const rafaelia_runtime_state_t *state)
     if (state->config.mode == RAFAELIA_RUNTIME_MODE_LOG ||
         state->config.debug) {
         error_report("RAFAELIA runtime tick=%" PRIu64
+                     " dt_last_us=%.3f dt_avg_us=%.3f dt_p95_us=%.3f"
                      " entropy=%.6f coherence=%.6f running=%d mode=%s",
                      state->ticks_total,
+                     state->last_tick_duration_ns / 1000.0,
+                     state->tick_avg_us,
+                     state->tick_p95_us,
                      state->entropy_last,
                      state->coherence_last,
                      state->running,
@@ -163,27 +197,84 @@ static void rafaelia_runtime_log_state_change(const rafaelia_runtime_state_t *st
 
 static void rafaelia_runtime_tick_once(rafaelia_runtime_state_t *state)
 {
+    int64_t start_ns;
+    int64_t end_ns;
+    uint64_t tick_ns;
+
+    start_ns = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
     rafaelia_loop_step(&state->core);
+    end_ns = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
+    tick_ns = end_ns > start_ns ? (uint64_t)(end_ns - start_ns) : 0u;
     state->ticks_total++;
+    state->tick_ns_total += tick_ns;
+    state->last_tick_duration_ns = tick_ns;
+    state->tick_ns_history[state->tick_ns_index] = tick_ns;
+    state->tick_ns_index = (state->tick_ns_index + 1) %
+        RAFAELIA_RUNTIME_TICK_HISTORY;
+    if (state->tick_ns_count < RAFAELIA_RUNTIME_TICK_HISTORY) {
+        state->tick_ns_count++;
+    }
+    if (state->ticks_total > 0) {
+        state->tick_avg_us = (double)state->tick_ns_total /
+            (double)state->ticks_total / 1000.0;
+    }
+    if (state->tick_ns_count > 0) {
+        uint64_t sorted[RAFAELIA_RUNTIME_TICK_HISTORY];
+        size_t count = state->tick_ns_count;
+        size_t idx;
+
+        for (size_t i = 0; i < count; i++) {
+            sorted[i] = state->tick_ns_history[i];
+        }
+        qsort(sorted, count, sizeof(sorted[0]),
+              rafaelia_runtime_compare_u64);
+        idx = (count * 95 + 99) / 100;
+        if (idx == 0) {
+            idx = 1;
+        }
+        state->tick_p95_us = (double)sorted[idx - 1] / 1000.0;
+    }
     state->entropy_last = rafaelia_cycle_measure(&state->core.cycle);
     state->coherence_last = state->core.phi_ethica.coerencia;
+
+    if ((tick_ns / 1000u) > RAFAELIA_RUNTIME_OVERHEAD_CAP_US) {
+        state->overhead_throttle_count++;
+        if (state->overhead_backoff < RAFAELIA_RUNTIME_OVERHEAD_BACKOFF_MAX) {
+            state->overhead_backoff++;
+        }
+    } else if (state->overhead_backoff > 0 &&
+               (tick_ns / 1000u) < (RAFAELIA_RUNTIME_OVERHEAD_CAP_US / 2)) {
+        state->overhead_backoff--;
+    }
 
     rafaelia_runtime_log_tick(state);
 }
 
 static uint32_t rafaelia_runtime_tick_interval_ms(const rafaelia_runtime_state_t *state)
 {
-    uint32_t tick_ms = state->config.tick_ms;
+    uint64_t tick_ms = state->config.tick_ms;
+
+    if (state->overhead_backoff > 0) {
+        uint64_t backoff = 1ULL << state->overhead_backoff;
+        if (tick_ms > UINT64_MAX / backoff) {
+            tick_ms = UINT64_MAX;
+        } else {
+            tick_ms *= backoff;
+        }
+    }
+    if (tick_ms > UINT32_MAX) {
+        tick_ms = UINT32_MAX;
+    }
 
     if (state->running) {
-        return tick_ms;
+        return (uint32_t)tick_ms;
     }
 
     if (tick_ms > (UINT32_MAX / 5)) {
-        return tick_ms;
+        return (uint32_t)tick_ms;
     }
 
-    return tick_ms * 5;
+    return (uint32_t)(tick_ms * 5);
 }
 
 static void rafaelia_runtime_maybe_tick(rafaelia_runtime_state_t *state)
@@ -310,6 +401,9 @@ void rafaelia_runtime_tick(uint32_t dt_ms)
 void rafaelia_runtime_shutdown(void)
 {
     rafaelia_runtime_state_t *state = &rafaelia_runtime_state;
+    g_autofree char *report = NULL;
+    g_autofree char *digest = NULL;
+    Error *local_err = NULL;
 
     if (!state->initialized) {
         return;
@@ -318,6 +412,30 @@ void rafaelia_runtime_shutdown(void)
     trace_rafaelia_runtime_shutdown(state->ticks_total,
                                     state->entropy_last,
                                     state->coherence_last);
+
+    report = g_strdup_printf("ticks=%" PRIu64
+                             " dt_avg_us=%.3f dt_p95_us=%.3f"
+                             " entropy=%.6f coherence=%.6f"
+                             " throttles=%u mode=%s",
+                             state->ticks_total,
+                             state->tick_avg_us,
+                             state->tick_p95_us,
+                             state->entropy_last,
+                             state->coherence_last,
+                             state->overhead_throttle_count,
+                             rafaelia_runtime_mode_name(state->config.mode));
+
+    if (qcrypto_hash_digest(QCRYPTO_HASH_ALGO_SHA256,
+                            report,
+                            strlen(report),
+                            &digest,
+                            &local_err) < 0) {
+        error_reportf_err(local_err, "RAFAELIA runtime hash failed: ");
+    }
+
+    error_report("RAFAELIA runtime shutdown: %s hash=%s",
+                 report,
+                 digest ? digest : "unavailable");
 
     if (state->vm_state_entry) {
         qemu_del_vm_change_state_handler(state->vm_state_entry);

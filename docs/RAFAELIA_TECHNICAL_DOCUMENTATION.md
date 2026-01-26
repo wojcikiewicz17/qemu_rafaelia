@@ -119,6 +119,8 @@ This documentation was created to provide a comprehensive, academically rigorous
 4. **Navigability**: Extensive cross-referencing and indexing
 5. **Traceability**: Complete file modification tracking
 
+For a dedicated professional, academic, market, and investor-grade narrative, see the companion dossier: **[RAFAELIA Professional Dossier](RAFAELIA_PROFESSIONAL_DOSSIER.md)**.
+
 ### Target Audience
 
 - **Researchers**: Academic researchers in virtualization, ethical AI, and systems engineering

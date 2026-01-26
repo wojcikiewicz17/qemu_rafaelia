@@ -124,6 +124,7 @@ UserLAnd ←→ [QEMU Rafaelia Hub] ←→ Magisk (Root)
 | [INTEGRATION_ARCHITECTURE.md](INTEGRATION_ARCHITECTURE.md) | Strategic design and architecture | Chapter 2 |
 | [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md) | Usage guide and API reference | Chapter 7 |
 | [INTEGRATION_SUMMARY.md](INTEGRATION_SUMMARY.md) | Implementation details and metrics | Chapter 6 |
+| [docs/RAFAELIA_ROADMAP.md](docs/RAFAELIA_ROADMAP.md) | Documentation map and delivery roadmap | Appendix E |
 
 #### Core Implementation Documentation
 | Document | Description | Chapter in Main Doc |

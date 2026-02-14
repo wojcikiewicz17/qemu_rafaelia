@@ -237,6 +237,24 @@ void rafaelia_loop_step(rafaelia_context_t *ctx, rafaelia_core_t *core);
 void rafaelia_loop_run(rafaelia_context_t *ctx, rafaelia_core_t *core, uint32_t iterations);
 
 /* Portal initialization - FIAT_PORTAL */
+static inline bool rafaelia_hyper_stack_copy_binary(rafaelia_core_t *core,
+                                                    const void *payload,
+                                                    size_t payload_len)
+{
+    size_t i;
+
+    if (!core || !payload || payload_len > RAFAELIA_STACK_SIZE_HYPER) {
+        return false;
+    }
+
+    for (i = 0; i < payload_len; i++) {
+        core->hyper_stack[i] = ((const uint8_t *)payload)[i];
+    }
+    core->stack_ptr = payload_len;
+
+    return true;
+}
+
 void rafaelia_fiat_portal_init(rafaelia_context_t *ctx, rafaelia_core_t *core);
 
 #endif /* HW_RAFAELIA_CORE_H */

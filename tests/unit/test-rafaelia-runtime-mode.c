@@ -37,6 +37,27 @@ static void test_runtime_mode_parse_mixed_invalid(void)
     g_assert_false(rafaelia_runtime_parse_mode("5trace", &mode));
 }
 
+static void test_runtime_mode_parse_whitespace_valid(void)
+{
+    rafaelia_runtime_mode_t mode = RAFAELIA_RUNTIME_MODE_SILENT;
+
+    g_assert_true(rafaelia_runtime_parse_mode(" trace ", &mode));
+    g_assert_cmpint(mode, ==, RAFAELIA_RUNTIME_MODE_TRACE);
+
+    g_assert_true(rafaelia_runtime_parse_mode(" 2 ", &mode));
+    g_assert_cmpint(mode, ==, RAFAELIA_RUNTIME_MODE_TRACE);
+
+    g_assert_true(rafaelia_runtime_parse_mode("\tlog\n", &mode));
+    g_assert_cmpint(mode, ==, RAFAELIA_RUNTIME_MODE_LOG);
+}
+
+static void test_runtime_mode_parse_whitespace_only_invalid(void)
+{
+    rafaelia_runtime_mode_t mode = RAFAELIA_RUNTIME_MODE_LOG;
+
+    g_assert_false(rafaelia_runtime_parse_mode("   ", &mode));
+}
+
 static void test_runtime_mode_parse_literal(void)
 {
     rafaelia_runtime_mode_t mode = RAFAELIA_RUNTIME_MODE_SILENT;
@@ -57,6 +78,10 @@ int main(int argc, char **argv)
                     test_runtime_mode_parse_numeric_overflow);
     g_test_add_func("/rafaelia/runtime-mode/parse-mixed-invalid",
                     test_runtime_mode_parse_mixed_invalid);
+    g_test_add_func("/rafaelia/runtime-mode/parse-whitespace-valid",
+                    test_runtime_mode_parse_whitespace_valid);
+    g_test_add_func("/rafaelia/runtime-mode/parse-whitespace-only-invalid",
+                    test_runtime_mode_parse_whitespace_only_invalid);
     g_test_add_func("/rafaelia/runtime-mode/parse-literal",
                     test_runtime_mode_parse_literal);
 

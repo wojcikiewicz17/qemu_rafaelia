@@ -21,6 +21,8 @@ typedef struct rafaelia_rmr_hw_profile {
     bool has_prefetch;
 } rafaelia_rmr_hw_profile_t;
 
+typedef void *(*rafaelia_rmr_memalign_fn)(size_t alignment, size_t size);
+
 typedef struct rafaelia_rmr_pool {
     void *buffer;
     void *free_list;
@@ -37,6 +39,8 @@ rafaelia_rmr_pool_t *rafaelia_rmr_pool_create(size_t element_size,
                                               uint32_t capacity,
                                               uint32_t alignment);
 void rafaelia_rmr_pool_destroy(rafaelia_rmr_pool_t *pool);
+void rafaelia_rmr_pool_set_memalign_for_test(rafaelia_rmr_memalign_fn fn);
+void rafaelia_rmr_pool_reset_memalign_for_test(void);
 void *rafaelia_rmr_pool_alloc(rafaelia_rmr_pool_t *pool);
 void *rafaelia_rmr_pool_alloc_uninitialized(rafaelia_rmr_pool_t *pool);
 void rafaelia_rmr_pool_free(rafaelia_rmr_pool_t *pool, void *ptr);

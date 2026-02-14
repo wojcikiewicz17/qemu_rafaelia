@@ -598,10 +598,7 @@ void rafaelia_fiat_portal_init(rafaelia_context_t *ctx, rafaelia_core_t *core)
     /* Initialize with BITRAF64 literal in stack */
     const char *bitraf = RAFAELIA_BITRAF64;
     size_t bitraf_len = rafaelia_rmr_strlen(bitraf);
-    if (bitraf_len < RAFAELIA_STACK_SIZE_HYPER) {
-        rafaelia_rmr_memcpy(core->hyper_stack, bitraf, bitraf_len);
-        core->stack_ptr = bitraf_len;
-    }
+    rafaelia_hyper_stack_copy_binary(core, bitraf, bitraf_len);
     
     /* Compute initial hash */
     rafaelia_hash_compute(&core->hash_vivo, core, sizeof(rafaelia_core_t));

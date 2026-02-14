@@ -7,6 +7,18 @@
 #include "hw/core/rafaelia-rmr.h"
 #include "hw/core/rafaelia-rmr-lowlevel.h"
 
+static rafaelia_rmr_memalign_fn rafaelia_rmr_memalign_alloc = qemu_memalign;
+
+void rafaelia_rmr_pool_set_memalign_for_test(rafaelia_rmr_memalign_fn fn)
+{
+    rafaelia_rmr_memalign_alloc = fn ? fn : qemu_memalign;
+}
+
+void rafaelia_rmr_pool_reset_memalign_for_test(void)
+{
+    rafaelia_rmr_memalign_alloc = qemu_memalign;
+}
+
 static size_t rafaelia_rmr_round_up(size_t value, size_t align)
 {
     if (align == 0) {
@@ -47,10 +59,20 @@ rafaelia_rmr_pool_t *rafaelia_rmr_pool_create(size_t element_size,
     }
 
     stride = rafaelia_rmr_round_up(stride, alignment);
+
+    if (capacity > SIZE_MAX / stride) {
+        return NULL;
+    }
+
     total = stride * capacity;
 
     pool = g_new0(rafaelia_rmr_pool_t, 1);
-    pool->buffer = qemu_memalign(alignment, total);
+    pool->buffer = rafaelia_rmr_memalign_alloc(alignment, total);
+    if (!pool->buffer) {
+        g_free(pool);
+        return NULL;
+    }
+
     pool->element_size = element_size;
     pool->stride = stride;
     pool->capacity = capacity;

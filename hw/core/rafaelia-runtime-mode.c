@@ -54,7 +54,14 @@ bool rafaelia_runtime_parse_mode(const char *mode_str,
             *mode = (rafaelia_runtime_mode_t)numeric_mode;
             return true;
         }
-        return false;
+
+        if (!endptr || *endptr != '\0' ||
+            numeric_mode > RAFAELIA_RUNTIME_MODE_BENCH) {
+            return false;
+        }
+
+        *mode = (rafaelia_runtime_mode_t)numeric_mode;
+        return true;
     }
 
     if (g_ascii_strcasecmp(mode_trimmed, "silent") == 0) {

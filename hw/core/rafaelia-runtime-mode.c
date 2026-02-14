@@ -41,12 +41,17 @@ bool rafaelia_runtime_parse_mode(const char *mode_str,
     if (g_ascii_isdigit(mode_str[0])) {
         errno = 0;
         numeric_mode = strtoul(mode_str, &endptr, 0);
-        if (errno != ERANGE && endptr && *endptr == '\0' &&
-            numeric_mode <= RAFAELIA_RUNTIME_MODE_BENCH) {
-            *mode = (rafaelia_runtime_mode_t)numeric_mode;
-            return true;
+        if (errno == ERANGE) {
+            return false;
         }
-        return false;
+
+        if (!endptr || *endptr != '\0' ||
+            numeric_mode > RAFAELIA_RUNTIME_MODE_BENCH) {
+            return false;
+        }
+
+        *mode = (rafaelia_runtime_mode_t)numeric_mode;
+        return true;
     }
 
     if (g_ascii_strcasecmp(mode_str, "silent") == 0) {

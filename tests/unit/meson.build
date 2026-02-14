@@ -49,6 +49,7 @@ tests = {
   'test-interval-tree': [],
   'test-fifo': [],
   'test-rafaelia-hyper-stack': [],
+  'test-rafaelia-runtime-mode': [meson.project_source_root() / 'hw/core/rafaelia-runtime-mode.c'],
 }
 
 if have_system or have_tools

@@ -4,6 +4,7 @@
 
 #include "qemu/osdep.h"
 #include "qemu/cacheinfo.h"
+#include "qemu/log.h"
 #include "hw/core/rafaelia-rmr.h"
 #include "hw/core/rafaelia-rmr-lowlevel.h"
 
@@ -136,6 +137,11 @@ void rafaelia_rmr_pool_free(rafaelia_rmr_pool_t *pool, void *ptr)
     }
 
     if (!rafaelia_rmr_pool_owns(pool, ptr)) {
+#ifdef DEBUG_RAFAELIA_RMR
+        qemu_log_mask(LOG_GUEST_ERROR,
+                      "rafaelia-rmr: ignoring free of non-pool pointer %p\n",
+                      ptr);
+#endif
         return;
     }
 

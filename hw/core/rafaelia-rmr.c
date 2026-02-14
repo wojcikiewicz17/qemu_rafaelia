@@ -135,6 +135,10 @@ void rafaelia_rmr_pool_free(rafaelia_rmr_pool_t *pool, void *ptr)
         return;
     }
 
+    if (!rafaelia_rmr_pool_owns(pool, ptr)) {
+        return;
+    }
+
     *(void **)ptr = pool->free_list;
     pool->free_list = ptr;
     if (pool->in_use > 0) {

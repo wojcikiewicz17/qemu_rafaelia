@@ -9,6 +9,7 @@
  */
 package com.vectras.vm.ui.screens
 
+import com.vectras.vm.core.VMService
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -80,30 +81,41 @@ fun VMExecutionScreen(
     var metrics by remember { mutableStateOf(VMMetrics()) }
     var logs by remember { mutableStateOf(listOf<VMLogEntry>()) }
     
-    // Simulate metrics updates (in real app, this would come from QEMU)
+    // Pull metrics from JNI bridge
     LaunchedEffect(executionState) {
         if (executionState == ExecutionState.STARTING) {
-            delay(2000)
-            executionState = ExecutionState.RUNNING
-            logs = logs + VMLogEntry(
-                System.currentTimeMillis(),
-                LogLevel.INFO,
-                "VM started successfully"
-            )
+            if (VMService.startVm(vmId)) {
+                executionState = ExecutionState.RUNNING
+                logs = logs + VMLogEntry(
+                    System.currentTimeMillis(),
+                    LogLevel.INFO,
+                    "VM started successfully"
+                )
+            } else {
+                executionState = ExecutionState.ERROR
+                logs = logs + VMLogEntry(
+                    System.currentTimeMillis(),
+                    LogLevel.ERROR,
+                    "Failed to start VM bridge"
+                )
+            }
         }
         
         while (executionState == ExecutionState.RUNNING) {
-            metrics = metrics.copy(
-                cpuUsagePercent = (20..80).random().toFloat(),
-                memoryUsedMB = (1024L..2048L).random(),
-                memoryTotalMB = 2048L,
-                diskReadMBps = (0..100).random().toFloat() / 10f,
-                diskWriteMBps = (0..50).random().toFloat() / 10f,
-                networkRxKBps = (0..500).random().toFloat(),
-                networkTxKBps = (0..200).random().toFloat(),
-                fps = (25..60).random(),
-                vncConnected = true
-            )
+            val bridge = VMService.collectMetrics()
+            if (bridge != null) {
+                metrics = metrics.copy(
+                    cpuUsagePercent = bridge.cpuUsagePercent,
+                    memoryUsedMB = bridge.memoryUsedMB,
+                    memoryTotalMB = bridge.memoryTotalMB,
+                    diskReadMBps = bridge.diskReadMBps,
+                    diskWriteMBps = bridge.diskWriteMBps,
+                    networkRxKBps = bridge.networkRxKBps,
+                    networkTxKBps = bridge.networkTxKBps,
+                    fps = bridge.fps,
+                    vncConnected = bridge.vncConnected
+                )
+            }
             delay(1000)
         }
     }
@@ -155,13 +167,16 @@ fun VMExecutionScreen(
                 onResume = { executionState = ExecutionState.RUNNING },
                 onStop = { 
                     executionState = ExecutionState.STOPPING
+                    VMService.stopVm()
                     logs = logs + VMLogEntry(
                         System.currentTimeMillis(),
                         LogLevel.INFO,
                         "Stopping VM..."
                     )
+                    executionState = ExecutionState.STOPPED
                 },
                 onRestart = {
+                    VMService.stopVm()
                     executionState = ExecutionState.STARTING
                     logs = logs + VMLogEntry(
                         System.currentTimeMillis(),

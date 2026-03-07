@@ -305,6 +305,19 @@ bool rafaelia_rmr_collect_instruments(rafaelia_rmr_instrument_snapshot_t *snapsh
 #else
     snapshot->has_kvm_accel = false;
 #endif
+
+#if defined(__x86_64__) || defined(__i386__)
+    rafaelia_rmr_collect_instruments_x86(snapshot);
+#elif defined(__aarch64__)
+    rafaelia_rmr_collect_instruments_arm64(snapshot);
+#elif defined(__riscv)
+    rafaelia_rmr_collect_instruments_riscv(snapshot);
+#endif
+
+#ifdef CONFIG_POSIX
+    rafaelia_rmr_collect_instruments_posix(snapshot);
+#endif
+
     return true;
 }
 

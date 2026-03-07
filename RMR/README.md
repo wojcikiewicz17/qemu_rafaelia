@@ -14,6 +14,8 @@ registro claro de decisões de performance e de integração com o core.
 - **Instrumentos de sistema no RMR**: novo snapshot low-level para detectar
   arquitetura, kernel, CPU online, RAM, paginação e disponibilidade de KVM
   sem camadas extras.
+- **Roteamento determinístico no core**: decisão de lane (`fallback`→`kvm`)
+  calculada por score low-level para reduzir jitter de seleção em runtime.
 
 ## Referências
 

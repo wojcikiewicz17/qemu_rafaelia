@@ -32,3 +32,10 @@ Campos coletados:
 - Header público: `include/hw/core/rafaelia-rmr.h`
 - Implementação: `hw/core/rafaelia-rmr.c`
 - Testes: `tests/unit/test-rafaelia-rmr-instruments.c`
+
+
+## Roteamento determinístico
+
+Após a coleta, o módulo pode calcular rota com `rafaelia_rmr_route_select()`,
+gerando `route`, `route_score`, `lane_id` e preferência de página grande sem
+alocação dinâmica.

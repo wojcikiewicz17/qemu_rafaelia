@@ -66,6 +66,9 @@ rafaelia_rmr_pool_free()
 
 O módulo também expõe `rafaelia_rmr_detect()` para preencher um perfil de
 hardware mínimo, usado como dica de alinhamento e prefetch.
+Além disso, `rafaelia_rmr_route_select()` calcula seleção determinística de rota
+(`fallback`, `portable`, `host_fast`, `kvm_accel`) para integração direta com
+o core em baixo overhead.
 
 ## API pública
 
@@ -80,8 +83,8 @@ void rafaelia_rmr_pool_free(rafaelia_rmr_pool_t *pool, void *ptr);
 bool rafaelia_rmr_pool_owns(const rafaelia_rmr_pool_t *pool, const void *ptr);
 void rafaelia_rmr_detect(rafaelia_rmr_hw_profile_t *profile);
 bool rafaelia_rmr_collect_instruments(rafaelia_rmr_instrument_snapshot_t *snapshot);
-const rafaelia_route_decision_t *
-rafaelia_route_select(const rafaelia_rmr_instrument_snapshot_t *snapshot);
+bool rafaelia_rmr_route_select(const rafaelia_rmr_instrument_snapshot_t *snapshot,
+                              rafaelia_rmr_route_decision_t *decision);
 ```
 
 ## Contrato de estabilidade de roteamento

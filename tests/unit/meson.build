@@ -52,7 +52,6 @@ tests = {
   'test-rafaelia-runtime-mode': [meson.project_source_root() / 'hw/core/rafaelia-runtime-mode.c'],
   'test-rafaelia-rmr-pool': [meson.project_source_root() / 'hw/core/rafaelia-rmr.c',
                              meson.project_source_root() / 'hw/core/rafaelia-rmr-lowlevel.c'],
-  # Covers idempotence, invariants, string truncation/NUL and no-Linux-KVM fallback paths.
   'test-rafaelia-rmr-instruments': [meson.project_source_root() / 'hw/core/rafaelia-rmr.c',
                                     meson.project_source_root() / 'hw/core/rafaelia-rmr-lowlevel.c'],
 }

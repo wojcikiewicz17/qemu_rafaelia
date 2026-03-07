@@ -42,6 +42,7 @@ system_ss.add(files(
   'qdev-hotplug.c',
   'qdev-properties-system.c',
   'rafaelia-core.c',
+  'rafaelia-qemu-shell.c',
   'rafaelia-route-table.c',
   'rafaelia-runtime.c',
   'rafaelia-runtime-mode.c',

@@ -7,91 +7,56 @@
  */
 
 #include "hw/core/rafaelia-core.h"
-#include "hw/core/rafaelia-rmr.h"
-#include "hw/core/rafaelia-rmr-lowlevel.h"
-#include <stdlib.h>
+#include "hw/core/rafaelia-qemu-shell.h"
 #include <string.h>
 
 enum {
     RAFAELIA_RMR_BLOCK_POOL_CAPACITY = 256,
 };
 
-static void rafaelia_memzero(void *ptr, size_t len)
+static const rafaelia_kernel_abi_t *rafaelia_context_get_abi(rafaelia_context_t *ctx)
 {
-    uint8_t *out = ptr;
-
-    while (len--) {
-        *out++ = 0;
+    if (!ctx) {
+        return rafaelia_qemu_shell_abi();
     }
+    if (!ctx->abi) {
+        ctx->abi = rafaelia_qemu_shell_abi();
+    }
+    return ctx->abi;
 }
 
-static void rafaelia_memcpy_bytes(void *dst, const void *src, size_t len)
+void rafaelia_context_bind_abi(rafaelia_context_t *ctx,
+                               const rafaelia_kernel_abi_t *abi)
 {
-    uint8_t *out = dst;
-    const uint8_t *in = src;
-
-    while (len--) {
-        *out++ = *in++;
-    }
-}
-
-static int rafaelia_memcmp_bytes(const void *a, const void *b, size_t len)
-{
-    const uint8_t *pa = a;
-    const uint8_t *pb = b;
-
-    while (len--) {
-        if (*pa != *pb) {
-            return (int)*pa - (int)*pb;
-        }
-        pa++;
-        pb++;
-    }
-    return 0;
-}
-
-static size_t rafaelia_strlen_bytes(const char *str)
-{
-    size_t len = 0;
-
-    while (str[len] != '\0') {
-        len++;
-    }
-    return len;
-}
-
-static void rafaelia_strlcpy(char *dst, const char *src, size_t dst_size)
-{
-    size_t i = 0;
-
-    if (dst_size == 0) {
+    if (!ctx) {
         return;
     }
-
-    while (i + 1 < dst_size && src[i] != '\0') {
-        dst[i] = src[i];
-        i++;
-    }
-    dst[i] = '\0';
+    ctx->abi = abi;
 }
 
 void rafaelia_context_init(rafaelia_context_t *ctx)
 {
+    const rafaelia_kernel_abi_t *abi;
+
     if (!ctx) {
         return;
     }
 
     memset(ctx, 0, sizeof(*ctx));
+    abi = rafaelia_qemu_shell_abi();
+    ctx->abi = abi;
 }
 
 void rafaelia_context_cleanup(rafaelia_context_t *ctx)
 {
+    const rafaelia_kernel_abi_t *abi = rafaelia_context_get_abi(ctx);
+
     if (!ctx) {
         return;
     }
 
     if (ctx->bloco_pool) {
-        rafaelia_rmr_pool_destroy(ctx->bloco_pool);
+        abi->pool_destroy(ctx->bloco_pool);
         ctx->bloco_pool = NULL;
     }
     ctx->bloco_pool_users = 0;
@@ -99,27 +64,31 @@ void rafaelia_context_cleanup(rafaelia_context_t *ctx)
 
 static void rafaelia_bloco_pool_acquire(rafaelia_context_t *ctx)
 {
+    const rafaelia_kernel_abi_t *abi = rafaelia_context_get_abi(ctx);
+
     if (!ctx) {
         return;
     }
 
     if (!ctx->bloco_pool) {
-        ctx->bloco_pool = rafaelia_rmr_pool_create(sizeof(rafaelia_bloco_t),
-                                                   RAFAELIA_RMR_BLOCK_POOL_CAPACITY,
-                                                   0);
+        ctx->bloco_pool = abi->pool_create(sizeof(rafaelia_bloco_t),
+                                           RAFAELIA_RMR_BLOCK_POOL_CAPACITY,
+                                           0);
     }
     ctx->bloco_pool_users++;
 }
 
 static void rafaelia_bloco_pool_release(rafaelia_context_t *ctx)
 {
+    const rafaelia_kernel_abi_t *abi = rafaelia_context_get_abi(ctx);
+
     if (!ctx || ctx->bloco_pool_users == 0) {
         return;
     }
 
     ctx->bloco_pool_users--;
     if (ctx->bloco_pool_users == 0 && ctx->bloco_pool) {
-        rafaelia_rmr_pool_destroy(ctx->bloco_pool);
+        abi->pool_destroy(ctx->bloco_pool);
         ctx->bloco_pool = NULL;
     }
 }
@@ -127,20 +96,22 @@ static void rafaelia_bloco_pool_release(rafaelia_context_t *ctx)
 /* Core initialization */
 void rafaelia_core_init(rafaelia_context_t *ctx, rafaelia_core_t *core)
 {
-    rafaelia_rmr_memzero(core, sizeof(rafaelia_core_t));
+    const rafaelia_kernel_abi_t *abi = rafaelia_context_get_abi(ctx);
+
+    abi->memzero(core, sizeof(rafaelia_core_t));
     
     /* Initialize kernel and core strings */
-    rafaelia_rmr_strlcpy(core->kernel, "ΣΔΩ", sizeof(core->kernel));
-    rafaelia_rmr_strlcpy(core->mode, RAFAELIA_MODE_STRING, sizeof(core->mode));
-    rafaelia_rmr_strlcpy(core->ethic, RAFAELIA_ETHIC_STRING, sizeof(core->ethic));
-    rafaelia_rmr_strlcpy(core->hash_core, RAFAELIA_HASH_CORE_STRING,
-                         sizeof(core->hash_core));
-    rafaelia_rmr_strlcpy(core->vector_core, RAFAELIA_VECTOR_CORE_STRING,
-                         sizeof(core->vector_core));
-    rafaelia_rmr_strlcpy(core->cognition, RAFAELIA_COGNITION_STRING,
-                         sizeof(core->cognition));
-    rafaelia_rmr_strlcpy(core->universe, RAFAELIA_UNIVERSE_STRING,
-                         sizeof(core->universe));
+    abi->strlcpy(core->kernel, "ΣΔΩ", sizeof(core->kernel));
+    abi->strlcpy(core->mode, RAFAELIA_MODE_STRING, sizeof(core->mode));
+    abi->strlcpy(core->ethic, RAFAELIA_ETHIC_STRING, sizeof(core->ethic));
+    abi->strlcpy(core->hash_core, RAFAELIA_HASH_CORE_STRING,
+                 sizeof(core->hash_core));
+    abi->strlcpy(core->vector_core, RAFAELIA_VECTOR_CORE_STRING,
+                 sizeof(core->vector_core));
+    abi->strlcpy(core->cognition, RAFAELIA_COGNITION_STRING,
+                 sizeof(core->cognition));
+    abi->strlcpy(core->universe, RAFAELIA_UNIVERSE_STRING,
+                 sizeof(core->universe));
     
     /* Initialize cycle - ψχρΔΣΩ with initial values */
     core->cycle.psi = 1.0;
@@ -186,47 +157,39 @@ void rafaelia_core_init(rafaelia_context_t *ctx, rafaelia_core_t *core)
 
     rafaelia_bloco_pool_acquire(ctx);
 
-    if (ctx) {
-        if (!rafaelia_rmr_collect_instruments(&ctx->instruments)) {
-            rafaelia_rmr_memzero(&ctx->instruments, sizeof(ctx->instruments));
-        }
-        if (!rafaelia_rmr_route_select(&ctx->instruments, &ctx->route)) {
-            rafaelia_rmr_memzero(&ctx->route, sizeof(ctx->route));
-            ctx->route.route = RAFAELIA_RMR_ROUTE_FALLBACK;
-            ctx->route.lane_id = 0;
-        }
+    /* Bootstrap deterministic host snapshot and route selection */
+    if (!abi->collect_instruments(&core->route_snapshot)) {
+        abi->memzero(&core->route_snapshot, sizeof(core->route_snapshot));
+        core->route_snapshot.arch = "unknown";
+        core->route_snapshot.cpu_online = 1;
+        core->route_snapshot.page_bytes = 4096;
+        core->route_snapshot.has_kvm_accel = false;
+    }
+    {
+        const rafaelia_kernel_route_decision_t *route;
 
-        switch (ctx->route.route) {
-        case RAFAELIA_RMR_ROUTE_KVM_ACCEL:
-            core->freq_hz = RAFAELIA_FREQ_144KHZ * 2.0;
-            break;
-        case RAFAELIA_RMR_ROUTE_HOST_FAST:
-            core->freq_hz = RAFAELIA_FREQ_144KHZ * 1.5;
-            break;
-        case RAFAELIA_RMR_ROUTE_PORTABLE:
-            core->freq_hz = RAFAELIA_FREQ_144KHZ;
-            break;
-        case RAFAELIA_RMR_ROUTE_FALLBACK:
-        default:
-            core->freq_hz = RAFAELIA_FREQ_144KHZ * 0.75;
-            break;
+        route = abi->route_select(&core->route_snapshot);
+        if (route) {
+            core->selected_route = *route;
         }
     }
 
     /* Seed deterministic RNG for noise generation */
-    rafaelia_rmr_rng_seed((uint32_t)(uintptr_t)core);
+    abi->rng_seed((uint32_t)(uintptr_t)core);
     
     /* Initialize hash/signature */
-    rafaelia_rmr_strlcpy(core->hash_vivo.assinatura,
-                         "RAFCODE-Φ-∆RafaelVerboΩ-𓂀ΔΦΩ",
-                         sizeof(core->hash_vivo.assinatura));
+    abi->strlcpy(core->hash_vivo.assinatura,
+                 "RAFCODE-Φ-∆RafaelVerboΩ-𓂀ΔΦΩ",
+                 sizeof(core->hash_vivo.assinatura));
 }
 
 /* Core cleanup */
 void rafaelia_core_cleanup(rafaelia_context_t *ctx, rafaelia_core_t *core)
 {
+    const rafaelia_kernel_abi_t *abi = rafaelia_context_get_abi(ctx);
+
     if (core->blocos) {
-        free(core->blocos);
+        abi->free_mem(core->blocos);
         core->blocos = NULL;
     }
     core->bloco_count = 0;
@@ -252,7 +215,7 @@ void rafaelia_cycle_step(rafaelia_cycle_t *cycle, rafaelia_ethica_t *ethica)
     double chi_new = psi_new * (cycle->chi > 0.0 ? cycle->chi : 1.0) * phi;
     
     /* ρ (rho) - Noise: expand from chi with small random perturbation */
-    double noise_factor = 1.0 + (rafaelia_rmr_rng_next() % 100) / 1000.0;
+    double noise_factor = 1.0 + (rafaelia_qemu_shell_abi()->rng_next() % 100) / 1000.0;
     double rho_new = chi_new * noise_factor;
     
     /* Δ (delta) - Transmutation: validate rho */
@@ -394,12 +357,13 @@ double rafaelia_formula_fibonacci_rafael(int n, double prev)
 /* Create a new block - Formula 80: Bloco_n structure */
 rafaelia_bloco_t *rafaelia_bloco_create(rafaelia_context_t *ctx, uint64_t id)
 {
+    const rafaelia_kernel_abi_t *abi = rafaelia_context_get_abi(ctx);
     rafaelia_bloco_t *bloco = NULL;
     if (ctx && ctx->bloco_pool) {
-        bloco = rafaelia_rmr_pool_alloc_uninitialized(ctx->bloco_pool);
+        bloco = abi->pool_alloc_uninitialized(ctx->bloco_pool);
     }
     if (!bloco) {
-        bloco = calloc(1, sizeof(rafaelia_bloco_t));
+        bloco = abi->alloc_zero(sizeof(rafaelia_bloco_t));
     }
     if (!bloco) {
         return NULL;
@@ -443,16 +407,18 @@ rafaelia_bloco_t *rafaelia_bloco_create(rafaelia_context_t *ctx, uint64_t id)
 
 void rafaelia_bloco_free(rafaelia_context_t *ctx, rafaelia_bloco_t *bloco)
 {
+    const rafaelia_kernel_abi_t *abi = rafaelia_context_get_abi(ctx);
+
     if (!bloco) {
         return;
     }
 
-    if (ctx && ctx->bloco_pool && rafaelia_rmr_pool_owns(ctx->bloco_pool, bloco)) {
-        rafaelia_rmr_pool_free(ctx->bloco_pool, bloco);
+    if (ctx && ctx->bloco_pool && abi->pool_owns(ctx->bloco_pool, bloco)) {
+        abi->pool_free(ctx->bloco_pool, bloco);
         return;
     }
 
-    free(bloco);
+    abi->free_mem(bloco);
 }
 
 /* Formula 76: Fᵦ(Bloco_n) evaluation */
@@ -518,8 +484,11 @@ bool rafaelia_hash_verify(const rafaelia_hash_t *hash, const void *data,
                          size_t len)
 {
     rafaelia_hash_t computed;
+    const rafaelia_kernel_abi_t *abi;
+
     rafaelia_hash_compute(&computed, data, len);
-    return rafaelia_rmr_memcmp(hash->sha3_256, computed.sha3_256, 32) == 0;
+    abi = rafaelia_qemu_shell_abi();
+    return abi->memcmp_bytes(hash->sha3_256, computed.sha3_256, 32) == 0;
 }
 
 /* Formula 20: OWLψ = Σ (Insight_n · Ética_n · Fluxo_n) */
@@ -615,16 +584,17 @@ void rafaelia_loop_run(rafaelia_context_t *ctx, rafaelia_core_t *core,
 /* Formula 65: FIAT_PORTAL :: 龍空神 { ARKREΩ_CORE + STACK128K_HYPER + ALG_RAFAELIA_RING } */
 void rafaelia_fiat_portal_init(rafaelia_context_t *ctx, rafaelia_core_t *core)
 {
+    const rafaelia_kernel_abi_t *abi = rafaelia_context_get_abi(ctx);
     /* Initialize the portal with full configuration */
     rafaelia_core_init(ctx, core);
     
     /* Set up the hyper stack */
-    rafaelia_rmr_memzero(core->hyper_stack, RAFAELIA_STACK_SIZE_HYPER);
+    abi->memzero(core->hyper_stack, RAFAELIA_STACK_SIZE_HYPER);
     core->stack_ptr = 0;
     
     /* Initialize with BITRAF64 literal in stack */
     const char *bitraf = RAFAELIA_BITRAF64;
-    size_t bitraf_len = rafaelia_rmr_strlen(bitraf);
+    size_t bitraf_len = abi->strlen_bytes(bitraf);
     rafaelia_hyper_stack_copy_binary(core, bitraf, bitraf_len);
     
     /* Compute initial hash */

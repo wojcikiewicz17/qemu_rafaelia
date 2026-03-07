@@ -23,3 +23,16 @@ registro claro de decisões de performance e de integração com o core.
 - Registro de autoria: `docs/RAFAELIA_MODULOMR.md`
 - API do core: `include/hw/core/rafaelia-core.h`
 - Instrumentos de sistema: `RMR/INSTRUMENTOS.md`
+
+## Fronteira estável (Kernel ABI)
+
+A integração entre núcleo low-level e infraestrutura foi desacoplada por
+`include/hw/core/rafaelia-kernel-abi.h` com implementação QEMU em
+`hw/core/rafaelia-qemu-shell.c`.
+
+### Regras de evolução de versão
+
+- Alterações na ABI devem ser aditivas sempre que possível.
+- Campos/funções existentes não devem mudar assinatura em linha estável.
+- Quebras de compatibilidade exigem revisão major + documentação de migração.
+- O core (`hw/core/rafaelia-core.c`) consome somente a ABI nessa fronteira.

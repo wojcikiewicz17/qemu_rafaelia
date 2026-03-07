@@ -7,6 +7,16 @@
 #include "qemu/log.h"
 #include "hw/core/rafaelia-rmr.h"
 #include "hw/core/rafaelia-rmr-lowlevel.h"
+#include "hw/core/rafaelia-rmr-instr.h"
+
+#ifdef CONFIG_POSIX
+#include <sys/utsname.h>
+#include <unistd.h>
+#endif
+
+#if defined(CONFIG_LINUX)
+#include <sys/sysinfo.h>
+#endif
 
 #ifdef CONFIG_POSIX
 #include <sys/utsname.h>

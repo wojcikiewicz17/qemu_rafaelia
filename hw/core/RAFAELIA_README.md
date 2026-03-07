@@ -200,6 +200,8 @@ void *rafaelia_rmr_pool_alloc(rafaelia_rmr_pool_t *pool);
 void rafaelia_rmr_pool_free(rafaelia_rmr_pool_t *pool, void *ptr);
 bool rafaelia_rmr_pool_owns(const rafaelia_rmr_pool_t *pool, const void *ptr);
 void rafaelia_rmr_detect(rafaelia_rmr_hw_profile_t *profile);
+const rafaelia_route_decision_t *
+rafaelia_route_select(const rafaelia_rmr_instrument_snapshot_t *snapshot);
 ```
 
 RMR oferece um pool de memória de baixa latência para blocos e um perfil simples
@@ -207,6 +209,21 @@ de hardware (cache line, páginas e arquitetura), facilitando interoperabilidade
 low-level sem camadas de abstração adicionais.
 
 Consulte a documentação dedicada em `docs/RAFAELIA_RMR.md`.
+
+### Deterministic Route Bootstrap
+
+During `rafaelia_core_init(ctx, core)`, after context/pool bootstrap, the core
+collects `rafaelia_rmr_instrument_snapshot_t` and performs a deterministic
+route decision:
+
+- Stores snapshot in `core->route_snapshot`
+- Stores selected route value in `core->selected_route`
+- Uses static route table keys: `arch`, `has_kvm_accel`, `cpu_online`,
+  `page_bytes`
+- Uses stable fallback route `portable-fallback` when no table entry matches
+
+The selector has no dynamic allocation and returns a pointer to static storage,
+which keeps route decision stable for the same host snapshot.
 
 ### Wisdom Index
 

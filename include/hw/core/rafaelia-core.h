@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <math.h>
-#include "hw/core/rafaelia-rmr.h"
+#include "hw/core/rafaelia-kernel-abi.h"
 
 /* RAFAELIA Constants and Literals */
 
@@ -122,7 +122,8 @@ typedef struct {
 } rafaelia_hash_t;
 
 typedef struct rafaelia_context {
-    rafaelia_rmr_pool_t *bloco_pool;
+    const rafaelia_kernel_abi_t *abi;
+    void *bloco_pool;
     uint32_t bloco_pool_users;
     rafaelia_rmr_instrument_snapshot_t instruments;
     rafaelia_rmr_route_decision_t route;
@@ -166,6 +167,10 @@ typedef struct {
     
     /* Frequencies */
     double freq_hz;               /* Operating frequency */
+
+    /* Deterministic host-route bootstrap */
+    rafaelia_kernel_instrument_snapshot_t route_snapshot;
+    rafaelia_kernel_route_decision_t selected_route;
     
     /* Stack */
     uint8_t hyper_stack[RAFAELIA_STACK_SIZE_HYPER];
@@ -175,6 +180,8 @@ typedef struct {
 /* Function prototypes */
 
 /* Core initialization and cleanup */
+void rafaelia_context_bind_abi(rafaelia_context_t *ctx,
+                               const rafaelia_kernel_abi_t *abi);
 void rafaelia_context_init(rafaelia_context_t *ctx);
 void rafaelia_context_cleanup(rafaelia_context_t *ctx);
 void rafaelia_core_init(rafaelia_context_t *ctx, rafaelia_core_t *core);

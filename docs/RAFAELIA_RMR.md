@@ -10,6 +10,9 @@
 - [MVP (escopo mínimo viável)](#mvp-escopo-mínimo-viável)
 - [Arquitetura](#arquitetura)
 - [API pública](#api-pública)
+- [Fronteira Kernel ABI](#fronteira-kernel-abi)
+- [Versionamento da ABI](#versionamento-da-abi)
+- [Contrato de estabilidade de roteamento](#contrato-de-estabilidade-de-roteamento)
 - [Integração com o core](#integração-com-o-core)
 - [Considerações de desempenho](#considerações-de-desempenho)
 - [Licenciamento e autoria](#licenciamento-e-autoria)
@@ -87,6 +90,60 @@ bool rafaelia_rmr_collect_instruments(rafaelia_rmr_instrument_snapshot_t *snapsh
 bool rafaelia_rmr_route_select(const rafaelia_rmr_instrument_snapshot_t *snapshot,
                               rafaelia_rmr_route_decision_t *decision);
 ```
+
+## Fronteira Kernel ABI
+
+A execução crítica do core RAFAELIA passa por uma fronteira estável definida em
+`include/hw/core/rafaelia-kernel-abi.h`. Essa ABI contém somente tipos POD e
+funções mínimas de entrada/saída para:
+
+- memória (`memzero`, `memcmp_bytes`, `strlcpy`, `strlen_bytes`);
+- alocação (`alloc_zero`, `free_mem`);
+- pool (`pool_create`, `pool_destroy`, `pool_alloc_uninitialized`, `pool_owns`, `pool_free`);
+- instrumentos e roteamento (`collect_instruments`, `route_select`);
+- ruído determinístico (`rng_seed`, `rng_next`).
+
+O adapter de infraestrutura QEMU fica isolado em
+`hw/core/rafaelia-qemu-shell.c` e exporta `rafaelia_qemu_shell_abi()`.
+Com isso, `hw/core/rafaelia-core.c` não precisa conhecer objetos de alto nível
+do QEMU nem APIs diretas de RMR fora da ABI.
+
+## Versionamento da ABI
+
+Regras de evolução da fronteira:
+
+1. **Compatibilidade binária first**: não alterar ordem/campos existentes dos
+   structs públicos da ABI em releases estáveis.
+2. **Mudança aditiva**: novos campos devem ser adicionados ao final de structs
+   e novas funções no final de `rafaelia_kernel_abi_t`.
+3. **Remoção só em major**: remoções/renomeações exigem versão major e janela
+   de migração documentada.
+4. **Fallback determinístico**: funções novas devem manter fallback seguro
+   quando o provider não suportar recurso avançado.
+5. **Core isolado**: qualquer novo ponto de infraestrutura deve entrar primeiro
+   na ABI antes de uso no core.
+
+## Contrato de estabilidade de roteamento
+
+O roteamento do core usa tabela estática (`hw/core/rafaelia-route-table.c`) com
+chaves mínimas por regra:
+
+- `arch`
+- `has_kvm_accel`
+- `cpu_online` (limiar mínimo)
+- `page_bytes` (valor exato)
+
+Contrato de estabilidade:
+
+1. A função `rafaelia_route_select()` é **determinística**: com o mesmo
+   `rafaelia_rmr_instrument_snapshot_t`, o resultado (`id` e `name`) é sempre o
+   mesmo.
+2. A decisão é **sem alocação dinâmica** e somente leitura de tabela estática.
+3. A política de desempate é fixa por ordem de declaração da tabela.
+4. Quando nenhuma rota casa, o fallback estável `portable-fallback` é usado.
+
+Essas regras evitam variabilidade runtime e facilitam auditoria de performance
+por arquitetura/host.
 
 ## Integração com o core
 

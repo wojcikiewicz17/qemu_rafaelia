@@ -8,6 +8,15 @@
 #include "hw/core/rafaelia-rmr.h"
 #include "hw/core/rafaelia-rmr-lowlevel.h"
 
+#ifdef CONFIG_POSIX
+#include <sys/utsname.h>
+#include <unistd.h>
+#endif
+
+#if defined(CONFIG_LINUX)
+#include <sys/sysinfo.h>
+#endif
+
 static rafaelia_rmr_memalign_fn rafaelia_rmr_memalign_alloc = qemu_memalign;
 
 void rafaelia_rmr_pool_set_memalign_for_test(rafaelia_rmr_memalign_fn fn)
@@ -200,4 +209,82 @@ void rafaelia_rmr_detect(rafaelia_rmr_hw_profile_t *profile)
 #else
     profile->has_prefetch = false;
 #endif
+}
+
+bool rafaelia_rmr_collect_instruments(rafaelia_rmr_instrument_snapshot_t *snapshot)
+{
+#ifdef CONFIG_POSIX
+    struct utsname uts;
+#endif
+#if defined(CONFIG_LINUX)
+    struct sysinfo info;
+#endif
+
+    if (!snapshot) {
+        return false;
+    }
+
+    rafaelia_rmr_memzero(snapshot, sizeof(*snapshot));
+
+#if defined(__x86_64__) || defined(_M_X64)
+    snapshot->arch = "x86_64";
+#elif defined(__i386__) || defined(_M_IX86)
+    snapshot->arch = "x86";
+#elif defined(__aarch64__)
+    snapshot->arch = "aarch64";
+#elif defined(__arm__) || defined(_M_ARM)
+    snapshot->arch = "arm";
+#elif defined(__powerpc64__) || defined(__ppc64__)
+    snapshot->arch = "ppc64";
+#elif defined(__riscv)
+    snapshot->arch = "riscv";
+#else
+    snapshot->arch = "unknown";
+#endif
+
+#if defined(CONFIG_LINUX)
+    snapshot->os = "linux";
+#elif defined(CONFIG_DARWIN)
+    snapshot->os = "darwin";
+#elif defined(CONFIG_WIN32)
+    snapshot->os = "windows";
+#else
+    snapshot->os = "unknown";
+#endif
+
+    snapshot->pointer_bits = (uint32_t)(sizeof(void *) * 8);
+    snapshot->page_bytes = (uint32_t)getpagesize();
+
+#if defined(_SC_NPROCESSORS_ONLN)
+    {
+        long cpus = sysconf(_SC_NPROCESSORS_ONLN);
+        if (cpus > 0 && cpus <= UINT32_MAX) {
+            snapshot->cpu_online = (uint32_t)cpus;
+        }
+    }
+#endif
+
+#ifdef CONFIG_POSIX
+    if (uname(&uts) == 0) {
+        rafaelia_rmr_strlcpy(snapshot->kernel_release, uts.release,
+                             sizeof(snapshot->kernel_release));
+        rafaelia_rmr_strlcpy(snapshot->machine, uts.machine,
+                             sizeof(snapshot->machine));
+    }
+#endif
+
+#if defined(CONFIG_LINUX)
+    if (sysinfo(&info) == 0) {
+        snapshot->uptime_seconds = (uint64_t)info.uptime;
+        snapshot->total_ram_kib = ((uint64_t)info.totalram * info.mem_unit) / 1024u;
+        snapshot->free_ram_kib = ((uint64_t)info.freeram * info.mem_unit) / 1024u;
+    }
+#endif
+
+#if defined(CONFIG_LINUX)
+    snapshot->has_kvm_accel = access("/dev/kvm", R_OK | W_OK) == 0;
+#else
+    snapshot->has_kvm_accel = false;
+#endif
+    return true;
 }

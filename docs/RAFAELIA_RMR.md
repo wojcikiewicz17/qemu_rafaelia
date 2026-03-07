@@ -131,7 +131,7 @@ chaves mínimas por regra:
 - `arch`
 - `has_kvm_accel`
 - `cpu_online` (limiar mínimo)
-- `page_bytes` (valor exato)
+- `page_bytes` (limiar mínimo da regra)
 
 Contrato de estabilidade:
 
@@ -140,7 +140,8 @@ Contrato de estabilidade:
    mesmo.
 2. A decisão é **sem alocação dinâmica** e somente leitura de tabela estática.
 3. A política de desempate é fixa por ordem de declaração da tabela.
-4. Quando nenhuma rota casa, o fallback estável `portable-fallback` é usado.
+4. A comparação de arquitetura aceita aliases estáveis (ex.: regra `x86_64` pode casar snapshot `x86`/`i386`; `riscv` aceita variantes `riscv*`).
+5. Quando nenhuma rota casa, o fallback estável `portable-fallback` é usado.
 
 Essas regras evitam variabilidade runtime e facilitam auditoria de performance
 por arquitetura/host.
@@ -179,3 +180,14 @@ de decisões de performance e integração.
 - [ ] Executar testes `test-rafaelia-rmr-pool`, `test-rafaelia-rmr-instruments` e
       `test-rafaelia-rmr-lowlevel` em alterações do módulo.
 - [ ] Revisar capacidade do pool conforme o perfil de uso real.
+
+
+## Changelog técnico (curto)
+
+- Ajuste de robustez na coleta de instrumentos para builds não-POSIX,
+  garantindo `page_bytes` default estável.
+- Remoção de duplicação de includes em `hw/core/rafaelia-rmr.c`.
+- Endurecimento da comparação de arquitetura e seleção de rota na tabela
+  determinística.
+- Alinhamento da integração core ↔ kernel ABI para evitar dependências
+  implícitas de tipos internos do RMR.

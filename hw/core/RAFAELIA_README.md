@@ -83,8 +83,8 @@ Block structure for knowledge management:
 ### Initialization
 
 ```c
-void rafaelia_core_init(rafaelia_core_t *core);
-void rafaelia_fiat_portal_init(rafaelia_core_t *core);
+void rafaelia_core_init(rafaelia_context_t *ctx, rafaelia_core_t *core);
+void rafaelia_fiat_portal_init(rafaelia_context_t *ctx, rafaelia_core_t *core);
 ```
 
 Initialize the RAFAELIA core and the FIAT_PORTAL with full configuration.
@@ -93,8 +93,8 @@ Initialize the RAFAELIA core and the FIAT_PORTAL with full configuration.
 
 ```c
 void rafaelia_cycle_step(rafaelia_cycle_t *cycle, rafaelia_ethica_t *ethica);
-void rafaelia_loop_step(rafaelia_core_t *core);
-void rafaelia_loop_run(rafaelia_core_t *core, uint32_t iterations);
+void rafaelia_loop_step(rafaelia_context_t *ctx, rafaelia_core_t *core);
+void rafaelia_loop_run(rafaelia_context_t *ctx, rafaelia_core_t *core, uint32_t iterations);
 ```
 
 Execute the ψχρΔΣΩ cycle:
@@ -393,3 +393,22 @@ The current implementation provides the foundation for:
 *Implementation follows RAFAELIA_BOOTBLOCK_v1 specification*
 *Low-level, non-abstracted, direct formula implementation*
 *For use within QEMU core systems*
+
+
+## Robustness and Integration Hardening (QEMU)
+
+Recent hardening in the RAFAELIA integration layer focuses on deterministic and
+safe behavior during host/route bootstrap and core lifecycle:
+
+- `rafaelia_context_t` now uses kernel ABI route/snapshot types directly,
+  removing implicit dependency on internal RMR route-class types.
+- `rafaelia_core_init()` resolves route decisions through ABI contracts
+  (`collect_instruments` and `route_select`) and stores snapshots into
+  `core->route_snapshot` and `core->selected_route`.
+- Defensive guards were added in core functions that dereference pointers,
+  including cycle, hash, loop and integral helpers.
+- Fallback route initialization is explicit and stable when no route decision
+  is available.
+
+These changes preserve build compatibility and reduce undefined behavior risks
+from null pointers or implicit type coupling.

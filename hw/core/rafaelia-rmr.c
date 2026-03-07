@@ -18,24 +18,6 @@
 #include <sys/sysinfo.h>
 #endif
 
-#ifdef CONFIG_POSIX
-#include <sys/utsname.h>
-#include <unistd.h>
-#endif
-
-#if defined(CONFIG_LINUX)
-#include <sys/sysinfo.h>
-#endif
-
-#ifdef CONFIG_POSIX
-#include <sys/utsname.h>
-#include <unistd.h>
-#endif
-
-#if defined(CONFIG_LINUX)
-#include <sys/sysinfo.h>
-#endif
-
 static rafaelia_rmr_memalign_fn rafaelia_rmr_memalign_alloc = qemu_memalign;
 
 void rafaelia_rmr_pool_set_memalign_for_test(rafaelia_rmr_memalign_fn fn)
@@ -221,7 +203,11 @@ void rafaelia_rmr_detect(rafaelia_rmr_hw_profile_t *profile)
     profile->pointer_bits = (uint32_t)(sizeof(void *) * 8);
     profile->cacheline_bytes = rafaelia_rmr_default_alignment();
     profile->alignment_bytes = profile->cacheline_bytes;
+#ifdef CONFIG_POSIX
     profile->page_bytes = (uint32_t)getpagesize();
+#else
+    profile->page_bytes = 4096u;
+#endif
 
 #if defined(__GNUC__) || defined(__clang__)
     profile->has_prefetch = true;
@@ -272,7 +258,11 @@ bool rafaelia_rmr_collect_instruments(rafaelia_rmr_instrument_snapshot_t *snapsh
 #endif
 
     snapshot->pointer_bits = (uint32_t)(sizeof(void *) * 8);
+#ifdef CONFIG_POSIX
     snapshot->page_bytes = (uint32_t)getpagesize();
+#else
+    snapshot->page_bytes = 4096u;
+#endif
 
 #if defined(_SC_NPROCESSORS_ONLN)
     {

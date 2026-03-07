@@ -82,12 +82,41 @@ static const rafaelia_route_decision_t rafaelia_route_fallback = {
     .page_bytes = 4096,
 };
 
-static bool rafaelia_route_arch_match(const char *left, const char *right)
+static bool rafaelia_route_arch_match(const char *rule_arch, const char *snapshot_arch)
 {
-    if (!left || !right) {
+    size_t rule_len;
+    size_t snapshot_len;
+
+    if (!rule_arch || !snapshot_arch) {
         return false;
     }
-    return rafaelia_rmr_memcmp(left, right, rafaelia_rmr_strlen(left) + 1) == 0;
+
+    rule_len = rafaelia_rmr_strlen(rule_arch);
+    snapshot_len = rafaelia_rmr_strlen(snapshot_arch);
+
+    if (rule_len == 0 || snapshot_len == 0) {
+        return false;
+    }
+
+    if (rafaelia_rmr_memcmp(rule_arch, snapshot_arch, rule_len) == 0 &&
+        snapshot_arch[rule_len] == '\0') {
+        return true;
+    }
+
+    if (rafaelia_rmr_memcmp(rule_arch, "x86_64", 6) == 0 &&
+        ((rafaelia_rmr_memcmp(snapshot_arch, "x86", 3) == 0 &&
+          snapshot_arch[3] == '\0') ||
+         (rafaelia_rmr_memcmp(snapshot_arch, "i386", 4) == 0 &&
+          snapshot_arch[4] == '\0'))) {
+        return true;
+    }
+
+    if (rafaelia_rmr_memcmp(rule_arch, "riscv", 5) == 0 &&
+        rafaelia_rmr_memcmp(snapshot_arch, "riscv", 5) == 0) {
+        return true;
+    }
+
+    return false;
 }
 
 static bool rafaelia_route_rule_match(const rafaelia_route_decision_t *route,
@@ -109,7 +138,7 @@ static bool rafaelia_route_rule_match(const rafaelia_route_decision_t *route,
         return false;
     }
 
-    if (snapshot->page_bytes != route->page_bytes) {
+    if (snapshot->page_bytes < route->page_bytes) {
         return false;
     }
 

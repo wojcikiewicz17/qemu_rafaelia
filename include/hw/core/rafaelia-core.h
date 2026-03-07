@@ -125,8 +125,8 @@ typedef struct rafaelia_context {
     const rafaelia_kernel_abi_t *abi;
     void *bloco_pool;
     uint32_t bloco_pool_users;
-    rafaelia_rmr_instrument_snapshot_t instruments;
-    rafaelia_rmr_route_decision_t route;
+    rafaelia_kernel_instrument_snapshot_t instruments;
+    rafaelia_kernel_route_decision_t route;
 } rafaelia_context_t;
 
 /* RAFAELIA Core State */

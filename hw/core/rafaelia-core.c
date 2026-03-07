@@ -98,6 +98,10 @@ void rafaelia_core_init(rafaelia_context_t *ctx, rafaelia_core_t *core)
 {
     const rafaelia_kernel_abi_t *abi = rafaelia_context_get_abi(ctx);
 
+    if (!core) {
+        return;
+    }
+
     abi->memzero(core, sizeof(rafaelia_core_t));
     
     /* Initialize kernel and core strings */
@@ -158,26 +162,44 @@ void rafaelia_core_init(rafaelia_context_t *ctx, rafaelia_core_t *core)
     rafaelia_bloco_pool_acquire(ctx);
 
     if (ctx) {
-        if (!rafaelia_rmr_collect_instruments(&ctx->instruments)) {
-            rafaelia_rmr_memzero(&ctx->instruments, sizeof(ctx->instruments));
-        }
-        if (!rafaelia_rmr_route_select(&ctx->instruments, &ctx->route)) {
-            rafaelia_rmr_memzero(&ctx->route, sizeof(ctx->route));
-            ctx->route.route = RAFAELIA_RMR_ROUTE_FALLBACK;
-            ctx->route.lane_id = 0;
+        if (!abi->collect_instruments(&ctx->instruments)) {
+            abi->memzero(&ctx->instruments, sizeof(ctx->instruments));
         }
 
-        switch (ctx->route.route) {
-        case RAFAELIA_RMR_ROUTE_KVM_ACCEL:
+        {
+            const rafaelia_kernel_route_decision_t *route =
+                abi->route_select(&ctx->instruments);
+
+            if (route) {
+                ctx->route = *route;
+            } else {
+                abi->memzero(&ctx->route, sizeof(ctx->route));
+                ctx->route.id = RAFAELIA_KERNEL_ROUTE_ID_PORTABLE;
+                ctx->route.name = "portable-fallback";
+                ctx->route.arch = "unknown";
+                ctx->route.has_kvm_accel = false;
+                ctx->route.cpu_online = 1;
+                ctx->route.page_bytes = 4096;
+            }
+        }
+
+        core->route_snapshot = ctx->instruments;
+        core->selected_route = ctx->route;
+
+        switch (ctx->route.id) {
+        case RAFAELIA_KERNEL_ROUTE_ID_X86_64_KVM_HOT:
+        case RAFAELIA_KERNEL_ROUTE_ID_AARCH64_KVM_HOT:
             core->freq_hz = RAFAELIA_FREQ_144KHZ * 2.0;
             break;
-        case RAFAELIA_RMR_ROUTE_HOST_FAST:
+        case RAFAELIA_KERNEL_ROUTE_ID_X86_64_SOFTMMU:
+        case RAFAELIA_KERNEL_ROUTE_ID_AARCH64_SOFTMMU:
             core->freq_hz = RAFAELIA_FREQ_144KHZ * 1.5;
             break;
-        case RAFAELIA_RMR_ROUTE_PORTABLE:
+        case RAFAELIA_KERNEL_ROUTE_ID_PPC64:
+        case RAFAELIA_KERNEL_ROUTE_ID_RISCV:
             core->freq_hz = RAFAELIA_FREQ_144KHZ;
             break;
-        case RAFAELIA_RMR_ROUTE_FALLBACK:
+        case RAFAELIA_KERNEL_ROUTE_ID_PORTABLE:
         default:
             core->freq_hz = RAFAELIA_FREQ_144KHZ * 0.75;
             break;
@@ -198,6 +220,10 @@ void rafaelia_core_cleanup(rafaelia_context_t *ctx, rafaelia_core_t *core)
 {
     const rafaelia_kernel_abi_t *abi = rafaelia_context_get_abi(ctx);
 
+    if (!core) {
+        return;
+    }
+
     if (core->blocos) {
         abi->free_mem(core->blocos);
         core->blocos = NULL;
@@ -212,7 +238,13 @@ void rafaelia_core_cleanup(rafaelia_context_t *ctx, rafaelia_core_t *core)
 /* Formula 0.6: ψ→χ→ρ→Δ→Σ→Ω→ψ - Cycle cognitive */
 void rafaelia_cycle_step(rafaelia_cycle_t *cycle, rafaelia_ethica_t *ethica)
 {
-    double phi = rafaelia_phi_ethica_compute(ethica);
+    double phi;
+
+    if (!cycle || !ethica) {
+        return;
+    }
+
+    phi = rafaelia_phi_ethica_compute(ethica);
     
     /* Bootstrap: if omega is 0, start from psi initial value */
     double omega_input = (cycle->omega > 0.0) ? cycle->omega : 1.0;
@@ -249,7 +281,13 @@ void rafaelia_cycle_step(rafaelia_cycle_t *cycle, rafaelia_ethica_t *ethica)
 /* Formula 12: R_Ω = Σ_n (ψ_n·χ_n·ρ_n·Δ_n·Σ_n·Ω_n)^{Φλ} */
 double rafaelia_cycle_measure(const rafaelia_cycle_t *cycle)
 {
-    double product = cycle->psi * cycle->chi * cycle->rho * 
+    double product;
+
+    if (!cycle) {
+        return 0.0;
+    }
+
+    product = cycle->psi * cycle->chi * cycle->rho *
                     cycle->delta * cycle->sigma * cycle->omega;
     double phi_lambda = RAFAELIA_PHI * 0.5; /* Φλ approximation */
     return pow(fabs(product), phi_lambda);
@@ -260,7 +298,11 @@ double rafaelia_cycle_measure(const rafaelia_cycle_t *cycle)
 /* Formula 0.4: Φ_ethica = Min(Entropia) × Max(Coerência) */
 double rafaelia_phi_ethica_compute(const rafaelia_ethica_t *ethica)
 {
-    return ethica->entropia_min * ethica->coerencia_max * 
+    if (!ethica) {
+        return 0.0;
+    }
+
+    return ethica->entropia_min * ethica->coerencia_max *
            ethica->amor * ethica->coerencia;
 }
 
@@ -288,7 +330,13 @@ double rafaelia_retro_weight(double amor, double coerencia)
 /* Formula 0.1: Retro_{Ω}^{A+C} = (F_ok, F_gap, F_next) ⊗ W(Amor,Coerência) */
 void rafaelia_retro_update(rafaelia_retro_t *retro, double amor, double coerencia)
 {
-    double weight = rafaelia_retro_weight(amor, coerencia);
+    double weight;
+
+    if (!retro) {
+        return;
+    }
+
+    weight = rafaelia_retro_weight(amor, coerencia);
     
     /* Update retroalimentation components */
     retro->f_ok *= weight;
@@ -432,10 +480,10 @@ void rafaelia_bloco_free(rafaelia_context_t *ctx, rafaelia_bloco_t *bloco)
 }
 
 /* Formula 76: Fᵦ(Bloco_n) evaluation */
-double rafaelia_bloco_evaluate(const rafaelia_bloco_t *bloco, 
+double rafaelia_bloco_evaluate(const rafaelia_bloco_t *bloco,
                               double phi_ethica, double owl_psi)
 {
-    if (phi_ethica == 0.0 || owl_psi == 0.0) {
+    if (!bloco || phi_ethica == 0.0 || owl_psi == 0.0) {
         return 0.0;
     }
 
@@ -476,6 +524,10 @@ void rafaelia_hash_compute(rafaelia_hash_t *hash, const void *data, size_t len)
 {
     /* Simple hash implementation (placeholder for SHA3/BLAKE3) */
     const uint8_t *bytes = data;
+
+    if (!hash || (!data && len > 0)) {
+        return;
+    }
     uint32_t h = 0x12345678;
     
     for (size_t i = 0; i < len; i++) {
@@ -490,11 +542,15 @@ void rafaelia_hash_compute(rafaelia_hash_t *hash, const void *data, size_t len)
     }
 }
 
-bool rafaelia_hash_verify(const rafaelia_hash_t *hash, const void *data, 
+bool rafaelia_hash_verify(const rafaelia_hash_t *hash, const void *data,
                          size_t len)
 {
     rafaelia_hash_t computed;
     const rafaelia_kernel_abi_t *abi;
+
+    if (!hash || (!data && len > 0)) {
+        return false;
+    }
 
     rafaelia_hash_compute(&computed, data, len);
     abi = rafaelia_qemu_shell_abi();
@@ -512,7 +568,13 @@ double rafaelia_owl_psi_compute(double insight, double etica, double fluxo)
 /* Formula 4: 𝓕_{∞}^{(Δ)} = ∮_Ω (ψ·χ·ρ·Σ·Ω)^{√3/2} d(φ·π·Δ) */
 double rafaelia_integral_toroid(const rafaelia_cycle_t *cycle)
 {
-    double product = cycle->psi * cycle->chi * cycle->rho * 
+    double product;
+
+    if (!cycle) {
+        return 0.0;
+    }
+
+    product = cycle->psi * cycle->chi * cycle->rho *
                     cycle->sigma * cycle->omega;
     double power = pow(fabs(product), RAFAELIA_SQRT3_2);
     double differential = RAFAELIA_PHI * RAFAELIA_PI;
@@ -520,10 +582,16 @@ double rafaelia_integral_toroid(const rafaelia_cycle_t *cycle)
 }
 
 /* Formula 11: Ativação_{Ω} = ∫_Λ^{∞} (ψ·χ·ρ·Δ·Σ·Ω)^{Φ_ethica} dφ */
-double rafaelia_integral_activation(const rafaelia_cycle_t *cycle, 
+double rafaelia_integral_activation(const rafaelia_cycle_t *cycle,
                                    double phi_ethica)
 {
-    double product = cycle->psi * cycle->chi * cycle->rho * 
+    double product;
+
+    if (!cycle) {
+        return 0.0;
+    }
+
+    product = cycle->psi * cycle->chi * cycle->rho *
                     cycle->delta * cycle->sigma * cycle->omega;
     double power = pow(fabs(product), phi_ethica);
     return power * RAFAELIA_PHI;
@@ -532,7 +600,13 @@ double rafaelia_integral_activation(const rafaelia_cycle_t *cycle,
 /* Formula 12: R_Ω = Σ_n (ψ_n·χ_n·ρ_n·Δ_n·Σ_n·Ω_n)^{Φλ} */
 double rafaelia_r_omega_compute(const rafaelia_cycle_t *cycle, double phi_lambda)
 {
-    double product = cycle->psi * cycle->chi * cycle->rho * 
+    double product;
+
+    if (!cycle) {
+        return 0.0;
+    }
+
+    product = cycle->psi * cycle->chi * cycle->rho *
                     cycle->delta * cycle->sigma * cycle->omega;
     return pow(fabs(product), phi_lambda);
 }
@@ -549,6 +623,10 @@ double rafaelia_voo_quantico(int n, double bloco, double salto, double retro)
 void rafaelia_loop_step(rafaelia_context_t *ctx, rafaelia_core_t *core)
 {
     (void)ctx;
+
+    if (!core) {
+        return;
+    }
     /* READ ψ - Read from living memory */
     double psi_input = core->cycle.omega;
     
@@ -586,6 +664,10 @@ void rafaelia_loop_step(rafaelia_context_t *ctx, rafaelia_core_t *core)
 void rafaelia_loop_run(rafaelia_context_t *ctx, rafaelia_core_t *core,
                        uint32_t iterations)
 {
+    if (!core) {
+        return;
+    }
+
     for (uint32_t i = 0; i < iterations; i++) {
         rafaelia_loop_step(ctx, core);
     }
@@ -595,6 +677,11 @@ void rafaelia_loop_run(rafaelia_context_t *ctx, rafaelia_core_t *core,
 void rafaelia_fiat_portal_init(rafaelia_context_t *ctx, rafaelia_core_t *core)
 {
     const rafaelia_kernel_abi_t *abi = rafaelia_context_get_abi(ctx);
+
+    if (!core) {
+        return;
+    }
+
     /* Initialize the portal with full configuration */
     rafaelia_core_init(ctx, core);
     

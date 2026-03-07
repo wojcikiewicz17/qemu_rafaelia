@@ -13,6 +13,7 @@
 #include "hw/core/rafaelia-core.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 /* Repository Identifiers */
 typedef enum {

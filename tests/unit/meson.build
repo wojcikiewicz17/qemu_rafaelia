@@ -52,6 +52,9 @@ tests = {
   'test-rafaelia-runtime-mode': [meson.project_source_root() / 'hw/core/rafaelia-runtime-mode.c'],
   'test-rafaelia-rmr-pool': [meson.project_source_root() / 'hw/core/rafaelia-rmr.c',
                              meson.project_source_root() / 'hw/core/rafaelia-rmr-lowlevel.c'],
+  'test-rafaelia-rmr-instruments': [meson.project_source_root() / 'hw/core/rafaelia-rmr.c',
+                                    meson.project_source_root() / 'hw/core/rafaelia-rmr-lowlevel.c'],
+  'test-rafaelia-rmr-lowlevel': [meson.project_source_root() / 'hw/core/rafaelia-rmr-lowlevel.c'],
 }
 
 if have_system or have_tools

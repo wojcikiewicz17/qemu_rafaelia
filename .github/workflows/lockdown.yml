@@ -18,7 +18,7 @@ jobs:
           pr-comment: |
             Thank you for your interest in the QEMU project.
 
-            This repository is a read-only mirror of the project's repostories hosted
+            This repository is a read-only mirror of the project's repositories hosted
             on https://gitlab.com/qemu-project/qemu.git.
             The project does not process merge requests filed on GitHub.
 

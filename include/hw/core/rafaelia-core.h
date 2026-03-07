@@ -124,6 +124,8 @@ typedef struct {
 typedef struct rafaelia_context {
     rafaelia_rmr_pool_t *bloco_pool;
     uint32_t bloco_pool_users;
+    rafaelia_rmr_instrument_snapshot_t instruments;
+    rafaelia_rmr_route_decision_t route;
 } rafaelia_context_t;
 
 /* RAFAELIA Core State */

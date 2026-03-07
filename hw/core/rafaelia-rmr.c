@@ -8,6 +8,15 @@
 #include "hw/core/rafaelia-rmr.h"
 #include "hw/core/rafaelia-rmr-lowlevel.h"
 
+#ifdef CONFIG_POSIX
+#include <sys/utsname.h>
+#include <unistd.h>
+#endif
+
+#if defined(CONFIG_LINUX)
+#include <sys/sysinfo.h>
+#endif
+
 static rafaelia_rmr_memalign_fn rafaelia_rmr_memalign_alloc = qemu_memalign;
 
 void rafaelia_rmr_pool_set_memalign_for_test(rafaelia_rmr_memalign_fn fn)
@@ -200,4 +209,190 @@ void rafaelia_rmr_detect(rafaelia_rmr_hw_profile_t *profile)
 #else
     profile->has_prefetch = false;
 #endif
+}
+
+bool rafaelia_rmr_collect_instruments(rafaelia_rmr_instrument_snapshot_t *snapshot)
+{
+#ifdef CONFIG_POSIX
+    struct utsname uts;
+#endif
+#if defined(CONFIG_LINUX)
+    struct sysinfo info;
+#endif
+
+    if (!snapshot) {
+        return false;
+    }
+
+    rafaelia_rmr_memzero(snapshot, sizeof(*snapshot));
+
+#if defined(__x86_64__) || defined(_M_X64)
+    snapshot->arch = "x86_64";
+#elif defined(__i386__) || defined(_M_IX86)
+    snapshot->arch = "x86";
+#elif defined(__aarch64__)
+    snapshot->arch = "aarch64";
+#elif defined(__arm__) || defined(_M_ARM)
+    snapshot->arch = "arm";
+#elif defined(__powerpc64__) || defined(__ppc64__)
+    snapshot->arch = "ppc64";
+#elif defined(__riscv)
+    snapshot->arch = "riscv";
+#else
+    snapshot->arch = "unknown";
+#endif
+
+#if defined(CONFIG_LINUX)
+    snapshot->os = "linux";
+#elif defined(CONFIG_DARWIN)
+    snapshot->os = "darwin";
+#elif defined(CONFIG_WIN32)
+    snapshot->os = "windows";
+#else
+    snapshot->os = "unknown";
+#endif
+
+    snapshot->pointer_bits = (uint32_t)(sizeof(void *) * 8);
+    snapshot->page_bytes = (uint32_t)getpagesize();
+
+#if defined(_SC_NPROCESSORS_ONLN)
+    {
+        long cpus = sysconf(_SC_NPROCESSORS_ONLN);
+        if (cpus > 0 && cpus <= UINT32_MAX) {
+            snapshot->cpu_online = (uint32_t)cpus;
+        }
+    }
+#endif
+
+#ifdef CONFIG_POSIX
+    if (uname(&uts) == 0) {
+        rafaelia_rmr_strlcpy(snapshot->kernel_release, uts.release,
+                             sizeof(snapshot->kernel_release));
+        rafaelia_rmr_strlcpy(snapshot->machine, uts.machine,
+                             sizeof(snapshot->machine));
+    }
+#endif
+
+#if defined(CONFIG_LINUX)
+    if (sysinfo(&info) == 0) {
+        snapshot->uptime_seconds = (uint64_t)info.uptime;
+        snapshot->total_ram_kib = ((uint64_t)info.totalram * info.mem_unit) / 1024u;
+        snapshot->free_ram_kib = ((uint64_t)info.freeram * info.mem_unit) / 1024u;
+    }
+#endif
+
+#if defined(CONFIG_LINUX)
+    snapshot->has_kvm_accel = access("/dev/kvm", R_OK | W_OK) == 0;
+#else
+    snapshot->has_kvm_accel = false;
+#endif
+    return true;
+}
+
+
+static bool rafaelia_rmr_arch_is(const char *arch, const char *name)
+{
+    size_t arch_len;
+    size_t name_len;
+
+    if (!arch || !name) {
+        return false;
+    }
+
+    arch_len = rafaelia_rmr_strlen(arch);
+    name_len = rafaelia_rmr_strlen(name);
+    if (arch_len != name_len) {
+        return false;
+    }
+
+    return rafaelia_rmr_memcmp(arch, name, arch_len) == 0;
+}
+
+static uint32_t rafaelia_rmr_arch_rank(const char *arch)
+{
+    if (!arch) {
+        return 0;
+    }
+
+    if (rafaelia_rmr_arch_is(arch, "x86_64")) {
+        return 5;
+    }
+    if (rafaelia_rmr_arch_is(arch, "aarch64")) {
+        return 5;
+    }
+    if (rafaelia_rmr_arch_is(arch, "riscv")) {
+        return 4;
+    }
+    if (rafaelia_rmr_arch_is(arch, "ppc64")) {
+        return 4;
+    }
+    if (rafaelia_rmr_arch_is(arch, "x86")) {
+        return 3;
+    }
+    if (rafaelia_rmr_arch_is(arch, "arm")) {
+        return 3;
+    }
+
+    return 1;
+}
+
+bool rafaelia_rmr_route_select(const rafaelia_rmr_instrument_snapshot_t *snapshot,
+                               rafaelia_rmr_route_decision_t *decision)
+{
+    uint32_t score = 0;
+
+    if (!snapshot || !decision) {
+        return false;
+    }
+
+    rafaelia_rmr_memzero(decision, sizeof(*decision));
+
+    score += rafaelia_rmr_arch_rank(snapshot->arch) * 10u;
+
+    if (snapshot->pointer_bits >= 64) {
+        score += 20u;
+    }
+
+    if (snapshot->cpu_online >= 16) {
+        score += 20u;
+    } else if (snapshot->cpu_online >= 8) {
+        score += 14u;
+    } else if (snapshot->cpu_online >= 4) {
+        score += 8u;
+    } else if (snapshot->cpu_online >= 2) {
+        score += 4u;
+    }
+
+    if (snapshot->total_ram_kib >= (32u * 1024u * 1024u)) {
+        score += 20u;
+    } else if (snapshot->total_ram_kib >= (8u * 1024u * 1024u)) {
+        score += 12u;
+    } else if (snapshot->total_ram_kib >= (2u * 1024u * 1024u)) {
+        score += 6u;
+    }
+
+    if (snapshot->page_bytes >= 16384u) {
+        score += 6u;
+        decision->prefers_large_pages = true;
+    } else if (snapshot->page_bytes >= 4096u) {
+        score += 3u;
+    }
+
+    if (snapshot->has_kvm_accel) {
+        score += 30u;
+        decision->route = RAFAELIA_RMR_ROUTE_KVM_ACCEL;
+        decision->lane_id = 3u;
+    } else if (score >= 70u) {
+        decision->route = RAFAELIA_RMR_ROUTE_HOST_FAST;
+        decision->lane_id = 2u;
+    } else if (score >= 35u) {
+        decision->route = RAFAELIA_RMR_ROUTE_PORTABLE;
+        decision->lane_id = 1u;
+    } else {
+        decision->route = RAFAELIA_RMR_ROUTE_FALLBACK;
+        decision->lane_id = 0u;
+    }
+
+    decision->route_score = score;
+    return true;
 }

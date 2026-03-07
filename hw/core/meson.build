@@ -45,6 +45,7 @@ system_ss.add(files(
   'rafaelia-runtime.c',
   'rafaelia-runtime-mode.c',
   'rafaelia-modulomr.c',
+  'rafaelia-rmr.c',
   'rafaelia-rmr-lowlevel.c',
   'rafaelia-symbiosis.c',
   'reset.c',

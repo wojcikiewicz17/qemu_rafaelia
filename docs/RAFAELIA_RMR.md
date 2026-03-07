@@ -46,6 +46,8 @@ O MVP do RMR inclui:
 - Snapshot de instrumentos de sistema (kernel/máquina/CPU/RAM/KVM) para
   roteamento determinístico orientado ao host.
 - Função de prefetch compatível com GCC/Clang.
+- Primitivas low-level com fast-path em ASM (x86_64 `rep stosb/movsb`) e
+  fallback determinístico por palavras para outros alvos.
 - Opção de alocação sem zero-initialize para caminhos hot que inicializam
   manualmente os campos.
 
@@ -174,4 +176,6 @@ de decisões de performance e integração.
 
 - [ ] Atualizar `docs/RAFAELIA_MODULOMR.md` ao alterar escopo ou autoria.
 - [ ] Manter a documentação de API em `hw/core/RAFAELIA_README.md`.
+- [ ] Executar testes `test-rafaelia-rmr-pool`, `test-rafaelia-rmr-instruments` e
+      `test-rafaelia-rmr-lowlevel` em alterações do módulo.
 - [ ] Revisar capacidade do pool conforme o perfil de uso real.

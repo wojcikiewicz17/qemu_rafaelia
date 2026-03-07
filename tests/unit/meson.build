@@ -54,6 +54,7 @@ tests = {
                              meson.project_source_root() / 'hw/core/rafaelia-rmr-lowlevel.c'],
   'test-rafaelia-rmr-instruments': [meson.project_source_root() / 'hw/core/rafaelia-rmr.c',
                                     meson.project_source_root() / 'hw/core/rafaelia-rmr-lowlevel.c'],
+  'test-rafaelia-rmr-lowlevel': [meson.project_source_root() / 'hw/core/rafaelia-rmr-lowlevel.c'],
 }
 
 if have_system or have_tools

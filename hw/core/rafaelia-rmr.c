@@ -18,6 +18,15 @@
 #include <sys/sysinfo.h>
 #endif
 
+#ifdef CONFIG_POSIX
+#include <sys/utsname.h>
+#include <unistd.h>
+#endif
+
+#if defined(CONFIG_LINUX)
+#include <sys/sysinfo.h>
+#endif
+
 static rafaelia_rmr_memalign_fn rafaelia_rmr_memalign_alloc = qemu_memalign;
 
 void rafaelia_rmr_pool_set_memalign_for_test(rafaelia_rmr_memalign_fn fn)

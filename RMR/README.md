@@ -16,6 +16,9 @@ registro claro de decisões de performance e de integração com o core.
   sem camadas extras.
 - **Roteamento determinístico no core**: decisão de lane (`fallback`→`kvm`)
   calculada por score low-level para reduzir jitter de seleção em runtime.
+- **Primitivas memória/string com fast-path ASM**: `memzero`/`memcpy` com
+  caminho `rep stosb/movsb` em x86_64 e fallback por palavras para manter
+  compatibilidade multiarquitetura.
 
 ## Referências
 
@@ -23,16 +26,3 @@ registro claro de decisões de performance e de integração com o core.
 - Registro de autoria: `docs/RAFAELIA_MODULOMR.md`
 - API do core: `include/hw/core/rafaelia-core.h`
 - Instrumentos de sistema: `RMR/INSTRUMENTOS.md`
-
-## Fronteira estável (Kernel ABI)
-
-A integração entre núcleo low-level e infraestrutura foi desacoplada por
-`include/hw/core/rafaelia-kernel-abi.h` com implementação QEMU em
-`hw/core/rafaelia-qemu-shell.c`.
-
-### Regras de evolução de versão
-
-- Alterações na ABI devem ser aditivas sempre que possível.
-- Campos/funções existentes não devem mudar assinatura em linha estável.
-- Quebras de compatibilidade exigem revisão major + documentação de migração.
-- O core (`hw/core/rafaelia-core.c`) consome somente a ABI nessa fronteira.

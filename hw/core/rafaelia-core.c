@@ -157,20 +157,30 @@ void rafaelia_core_init(rafaelia_context_t *ctx, rafaelia_core_t *core)
 
     rafaelia_bloco_pool_acquire(ctx);
 
-    /* Bootstrap deterministic host snapshot and route selection */
-    if (!abi->collect_instruments(&core->route_snapshot)) {
-        abi->memzero(&core->route_snapshot, sizeof(core->route_snapshot));
-        core->route_snapshot.arch = "unknown";
-        core->route_snapshot.cpu_online = 1;
-        core->route_snapshot.page_bytes = 4096;
-        core->route_snapshot.has_kvm_accel = false;
-    }
-    {
-        const rafaelia_kernel_route_decision_t *route;
+    if (ctx) {
+        if (!rafaelia_rmr_collect_instruments(&ctx->instruments)) {
+            rafaelia_rmr_memzero(&ctx->instruments, sizeof(ctx->instruments));
+        }
+        if (!rafaelia_rmr_route_select(&ctx->instruments, &ctx->route)) {
+            rafaelia_rmr_memzero(&ctx->route, sizeof(ctx->route));
+            ctx->route.route = RAFAELIA_RMR_ROUTE_FALLBACK;
+            ctx->route.lane_id = 0;
+        }
 
-        route = abi->route_select(&core->route_snapshot);
-        if (route) {
-            core->selected_route = *route;
+        switch (ctx->route.route) {
+        case RAFAELIA_RMR_ROUTE_KVM_ACCEL:
+            core->freq_hz = RAFAELIA_FREQ_144KHZ * 2.0;
+            break;
+        case RAFAELIA_RMR_ROUTE_HOST_FAST:
+            core->freq_hz = RAFAELIA_FREQ_144KHZ * 1.5;
+            break;
+        case RAFAELIA_RMR_ROUTE_PORTABLE:
+            core->freq_hz = RAFAELIA_FREQ_144KHZ;
+            break;
+        case RAFAELIA_RMR_ROUTE_FALLBACK:
+        default:
+            core->freq_hz = RAFAELIA_FREQ_144KHZ * 0.75;
+            break;
         }
     }
 

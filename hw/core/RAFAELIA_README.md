@@ -217,7 +217,7 @@ collects `rafaelia_rmr_instrument_snapshot_t` and performs a deterministic
 route decision:
 
 - Stores snapshot in `core->route_snapshot`
-- Stores selected route pointer in `core->selected_route`
+- Stores selected route value in `core->selected_route`
 - Uses static route table keys: `arch`, `has_kvm_accel`, `cpu_online`,
   `page_bytes`
 - Uses stable fallback route `portable-fallback` when no table entry matches

@@ -138,6 +138,7 @@ UserLAnd ←→ [QEMU Rafaelia Hub] ←→ Magisk (Root)
 | [docs/RAFAELIA_AUTHORSHIP_BOUNDARIES.md](docs/RAFAELIA_AUTHORSHIP_BOUNDARIES.md) | Authorship boundaries, framework layers, and module map | Appendix D |
 | [docs/RAFAELIA_MODULOMR.md](docs/RAFAELIA_MODULOMR.md) | Authorship and licensing registry (ModulomR) | Appendix D |
 | [docs/RAFAELIA_RMR.md](docs/RAFAELIA_RMR.md) | Runtime Memory Reduction (RMR) module | Appendix D |
+| [docs/RAFAELIA_DIRECTORY_AUDIT.md](docs/RAFAELIA_DIRECTORY_AUDIT.md) | Audited directories and verification coverage | Appendix E |
 
 #### UI/UX Documentation (ISO 9001/8000 Compliant)
 | Document | Description | Chapter in Main Doc |

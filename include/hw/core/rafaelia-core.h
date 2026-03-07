@@ -21,6 +21,7 @@
 #include <stddef.h>
 #include <math.h>
 #include "hw/core/rafaelia-rmr.h"
+#include "hw/core/rafaelia-route-table.h"
 
 /* RAFAELIA Constants and Literals */
 
@@ -166,6 +167,10 @@ typedef struct {
     
     /* Frequencies */
     double freq_hz;               /* Operating frequency */
+
+    /* Deterministic host-route bootstrap */
+    rafaelia_rmr_instrument_snapshot_t route_snapshot;
+    const rafaelia_route_decision_t *selected_route;
     
     /* Stack */
     uint8_t hyper_stack[RAFAELIA_STACK_SIZE_HYPER];

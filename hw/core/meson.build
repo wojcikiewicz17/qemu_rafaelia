@@ -42,12 +42,23 @@ system_ss.add(files(
   'qdev-hotplug.c',
   'qdev-properties-system.c',
   'rafaelia-core.c',
+  'rafaelia-route-table.c',
   'rafaelia-runtime.c',
   'rafaelia-runtime-mode.c',
   'rafaelia-modulomr.c',
   'rafaelia-rmr.c',
   'rafaelia-rmr-lowlevel.c',
+  'rafaelia-rmr-instr-posix.c',
   'rafaelia-symbiosis.c',
+))
+
+system_ss.add(when: ['TARGET_X86_64'], if_true: files('rafaelia-rmr-instr-x86.c'))
+system_ss.add(when: ['TARGET_I386'], if_true: files('rafaelia-rmr-instr-x86.c'))
+system_ss.add(when: 'TARGET_AARCH64', if_true: files('rafaelia-rmr-instr-arm64.c'))
+system_ss.add(when: ['TARGET_RISCV32'], if_true: files('rafaelia-rmr-instr-riscv.c'))
+system_ss.add(when: ['TARGET_RISCV64'], if_true: files('rafaelia-rmr-instr-riscv.c'))
+
+system_ss.add(files(
   'reset.c',
   'sysbus.c',
   'vm-change-state-handler.c',

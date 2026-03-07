@@ -185,7 +185,18 @@ void rafaelia_core_init(rafaelia_context_t *ctx, rafaelia_core_t *core)
     core->stack_ptr = 0;
 
     rafaelia_bloco_pool_acquire(ctx);
-    
+
+    /* Bootstrap deterministic host snapshot and route selection */
+    if (!rafaelia_rmr_collect_instruments(&core->route_snapshot)) {
+        rafaelia_rmr_memzero(&core->route_snapshot,
+                             sizeof(core->route_snapshot));
+        core->route_snapshot.arch = "unknown";
+        core->route_snapshot.cpu_online = 1;
+        core->route_snapshot.page_bytes = 4096;
+        core->route_snapshot.has_kvm_accel = false;
+    }
+    core->selected_route = rafaelia_route_select(&core->route_snapshot);
+
     /* Seed deterministic RNG for noise generation */
     rafaelia_rmr_rng_seed((uint32_t)(uintptr_t)core);
     

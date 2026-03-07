@@ -40,6 +40,8 @@ O MVP do RMR inclui:
 - Pool fixo com `capacity` definida, alinhamento por cache line e fallback para
   `calloc` quando necessário.
 - Detecção simples de arquitetura, cache line e tamanho de página.
+- Snapshot de instrumentos de sistema (kernel/máquina/CPU/RAM/KVM) para
+  roteamento determinístico orientado ao host.
 - Função de prefetch compatível com GCC/Clang.
 - Opção de alocação sem zero-initialize para caminhos hot que inicializam
   manualmente os campos.
@@ -76,6 +78,7 @@ void *rafaelia_rmr_pool_alloc_uninitialized(rafaelia_rmr_pool_t *pool);
 void rafaelia_rmr_pool_free(rafaelia_rmr_pool_t *pool, void *ptr);
 bool rafaelia_rmr_pool_owns(const rafaelia_rmr_pool_t *pool, const void *ptr);
 void rafaelia_rmr_detect(rafaelia_rmr_hw_profile_t *profile);
+bool rafaelia_rmr_collect_instruments(rafaelia_rmr_instrument_snapshot_t *snapshot);
 ```
 
 ## Integração com o core

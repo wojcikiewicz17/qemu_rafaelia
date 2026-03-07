@@ -185,7 +185,34 @@ void rafaelia_core_init(rafaelia_context_t *ctx, rafaelia_core_t *core)
     core->stack_ptr = 0;
 
     rafaelia_bloco_pool_acquire(ctx);
-    
+
+    if (ctx) {
+        if (!rafaelia_rmr_collect_instruments(&ctx->instruments)) {
+            rafaelia_rmr_memzero(&ctx->instruments, sizeof(ctx->instruments));
+        }
+        if (!rafaelia_rmr_route_select(&ctx->instruments, &ctx->route)) {
+            rafaelia_rmr_memzero(&ctx->route, sizeof(ctx->route));
+            ctx->route.route = RAFAELIA_RMR_ROUTE_FALLBACK;
+            ctx->route.lane_id = 0;
+        }
+
+        switch (ctx->route.route) {
+        case RAFAELIA_RMR_ROUTE_KVM_ACCEL:
+            core->freq_hz = RAFAELIA_FREQ_144KHZ * 2.0;
+            break;
+        case RAFAELIA_RMR_ROUTE_HOST_FAST:
+            core->freq_hz = RAFAELIA_FREQ_144KHZ * 1.5;
+            break;
+        case RAFAELIA_RMR_ROUTE_PORTABLE:
+            core->freq_hz = RAFAELIA_FREQ_144KHZ;
+            break;
+        case RAFAELIA_RMR_ROUTE_FALLBACK:
+        default:
+            core->freq_hz = RAFAELIA_FREQ_144KHZ * 0.75;
+            break;
+        }
+    }
+
     /* Seed deterministic RNG for noise generation */
     rafaelia_rmr_rng_seed((uint32_t)(uintptr_t)core);
     

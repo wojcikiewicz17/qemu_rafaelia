@@ -1,27 +1,37 @@
-# RAFAELIA Directory Audit (Checked Paths)
+# RAFAELIA Directory Audit (Refatorado)
 
-## Escopo
+**Data da auditoria:** 2026-04-17  
+**Método:** validação de presença de diretórios-chave + aderência ao fluxo build/CI documentado.
 
-Este registro lista os diretórios auditados para atualização de roadmap e controle de cobertura documental/técnica.
+## 1) Escopo auditado
 
-## Diretórios verificados
+| Diretório | Papel no sistema | Status |
+|---|---|---|
+| `.` | Raiz (build scripts, docs, workflows) | ✅ |
+| `.github/workflows` | Automação CI/CD e governança | ✅ |
+| `docs` | Base documental consolidada | ✅ |
+| `hw/core` | Núcleo RAFAELIA e integração | ✅ |
+| `include` | Headers e contratos de API | ✅ |
+| `scripts` | Ferramental de suporte | ✅ |
+| `tests` | Validações e regressões | ✅ |
+| `target` | Implementações por arquitetura | ✅ |
+| `util` | Infra utilitária transversal | ✅ |
 
-| Diretório | Categoria | Evidência de conteúdo | Resultado |
-|-----------|-----------|------------------------|-----------|
-| `.` | Raiz do projeto | Presença de `Makefile`, `README_RAFAELIA.md`, docs e código-fonte principal | ✅ OK |
-| `.github/workflows` | CI/CD | Pipelines e automações de validação | ✅ OK |
-| `analysis_reports/qemu_rafaelia` | Relatórios | Área para resultados analíticos e consolidado técnico | ✅ OK |
-| `docs` | Documentação | Hub de documentação RAFAELIA + docs upstream | ✅ OK |
-| `hw/core` | Núcleo de integração | Módulos centrais RAFAELIA e integração com QEMU | ✅ OK |
-| `include` | Headers públicos/internos | Contratos de API e interfaces internas | ✅ OK |
-| `linux-user` | User-mode emulação | Estruturas por arquitetura e syscalls | ✅ OK |
-| `migration` | Migração/estado | Módulos de migração e transporte de estado | ✅ OK |
-| `scripts` | Ferramental operacional | Scripts de build/test/performance/infra | ✅ OK |
-| `target` | Arquiteturas alvo | Implementações por ISA suportada | ✅ OK |
-| `tests` | Qualidade e validação | Test suites (unit/functional/tcg etc.) | ✅ OK |
-| `util` | Utilitários de base | Implementações utilitárias de suporte | ✅ OK |
+## 2) Comandos de auditoria usados
 
-## Observações de consistência
+```bash
+pwd
+rg --files .github docs | head -n 200
+rg --files | rg 'RAFAELIA|README_RAFAELIA|INTEGRATION_|ERROR_HANDLING' | head -n 200
+```
 
-- A árvore auditada cobre documentação, núcleo de integração, runtime, testes e infraestrutura.
-- O estado atual permite evoluir o roadmap com foco em release policy, compatibilidade e evidências automatizadas.
+## 3) Conclusões
+
+1. A árvore contém os pontos necessários para manter o ciclo **documentação → build → artefatos**.
+2. A documentação foi reorganizada para reduzir divergência com os workflows reais.
+3. A trilha oficial de CI está apta para smoke build e upload de artefatos.
+
+## 4) Pendências estruturais mapeadas
+
+- Ainda não há job explícito no CI para executar `Makefile.integration test`.
+- Não há publicação automática de métricas históricas de build em artefato dedicado.

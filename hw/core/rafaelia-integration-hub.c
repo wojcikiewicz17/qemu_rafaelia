@@ -6,22 +6,100 @@
  */
 
 #include "hw/core/rafaelia-integration.h"
+#include "hw/core/rafaelia-connector-ipc.h"
 #include "hw/core/rafaelia-rmr-lowlevel.h"
+#include <errno.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <math.h>
 
 /* Internal state */
 static uint64_t next_request_id = 1;
 static uint64_t next_event_id = 1;
+static pthread_mutex_t hub_lock = PTHREAD_MUTEX_INITIALIZER;
+
+typedef struct {
+    rafaelia_request_t req;
+    rafaelia_response_callback_t callback;
+    void *userdata;
+    uint64_t sequence;
+} hub_msg_node_t;
+
+static hub_msg_node_t hub_msg_heap[RAFAELIA_IPC_QUEUE_CAPACITY];
+static size_t hub_msg_heap_len;
+static uint64_t hub_seq_counter;
 
 /* Utility: Get current timestamp in microseconds */
 static uint64_t get_timestamp_us(void)
 {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (uint64_t)ts.tv_sec * 1000000 + (uint64_t)ts.tv_nsec / 1000;
+    return rafaelia_ipc_now_us();
+}
+
+static int hub_node_cmp(const hub_msg_node_t *a, const hub_msg_node_t *b)
+{
+    if (a->req.priority != b->req.priority) {
+        return (int)a->req.priority - (int)b->req.priority;
+    }
+    if (a->req.capabilities_required != b->req.capabilities_required) {
+        return (a->req.capabilities_required > b->req.capabilities_required) ? 1 : -1;
+    }
+    if (a->sequence < b->sequence) {
+        return 1;
+    }
+    if (a->sequence > b->sequence) {
+        return -1;
+    }
+    return 0;
+}
+
+static void hub_heap_push(const hub_msg_node_t *node)
+{
+    size_t i = hub_msg_heap_len++;
+    hub_msg_heap[i] = *node;
+
+    while (i > 0) {
+        size_t p = (i - 1) / 2;
+        if (hub_node_cmp(&hub_msg_heap[i], &hub_msg_heap[p]) <= 0) {
+            break;
+        }
+        hub_msg_node_t tmp = hub_msg_heap[i];
+        hub_msg_heap[i] = hub_msg_heap[p];
+        hub_msg_heap[p] = tmp;
+        i = p;
+    }
+}
+
+static int hub_heap_pop(hub_msg_node_t *out)
+{
+    size_t i = 0;
+    if (hub_msg_heap_len == 0) {
+        return -1;
+    }
+    *out = hub_msg_heap[0];
+    hub_msg_heap[0] = hub_msg_heap[--hub_msg_heap_len];
+
+    while (1) {
+        size_t l = i * 2 + 1;
+        size_t r = i * 2 + 2;
+        size_t best = i;
+        if (l < hub_msg_heap_len && hub_node_cmp(&hub_msg_heap[l], &hub_msg_heap[best]) > 0) {
+            best = l;
+        }
+        if (r < hub_msg_heap_len && hub_node_cmp(&hub_msg_heap[r], &hub_msg_heap[best]) > 0) {
+            best = r;
+        }
+        if (best == i) {
+            break;
+        }
+        hub_msg_node_t tmp = hub_msg_heap[i];
+        hub_msg_heap[i] = hub_msg_heap[best];
+        hub_msg_heap[best] = tmp;
+        i = best;
+    }
+    return 0;
 }
 
 /* Repository name mapping */
@@ -383,12 +461,38 @@ int rafaelia_integration_send_request_sync(rafaelia_integration_hub_t *hub,
                                           rafaelia_response_t *response,
                                           uint32_t timeout_ms)
 {
+    hub_msg_node_t node;
+    rafaelia_request_t req_copy;
+
     if (!hub || !hub->initialized || !request || !response) {
         return -1;
     }
-    
+
+    req_copy = *request;
+    if (timeout_ms > 0) {
+        req_copy.timeout_ms = timeout_ms;
+    }
+    pthread_mutex_lock(&hub_lock);
+    if (req_copy.id == 0) {
+        req_copy.id = next_request_id++;
+    }
+    if (hub_msg_heap_len >= RAFAELIA_IPC_QUEUE_CAPACITY) {
+        pthread_mutex_unlock(&hub_lock);
+        return -ENOSPC;
+    }
+    node.req = req_copy;
+    node.callback = NULL;
+    node.userdata = NULL;
+    node.sequence = hub_seq_counter++;
+    hub_heap_push(&node);
+    if (hub_heap_pop(&node) != 0) {
+        pthread_mutex_unlock(&hub_lock);
+        return -EIO;
+    }
+    pthread_mutex_unlock(&hub_lock);
+
     /* Route request */
-    rafaelia_repository_id_t target = rafaelia_integration_route_request(hub, request);
+    rafaelia_repository_id_t target = rafaelia_integration_route_request(hub, &node.req);
     rafaelia_connector_t *conn = &hub->connectors[target];
     
     /* Update statistics */
@@ -411,7 +515,7 @@ int rafaelia_integration_send_request_sync(rafaelia_integration_hub_t *hub,
     
     /* Receive response (simplified for now) */
     RAFAELIA_RESPONSE_INIT(response);
-    response->request_id = request->id;
+    response->request_id = node.req.id;
     response->source = target;
     response->status_code = 0;
     response->timestamp = get_timestamp_us();
@@ -429,6 +533,20 @@ int rafaelia_integration_send_request_sync(rafaelia_integration_hub_t *hub,
     rafaelia_integration_update_connector_metrics(hub, target, response);
     
     return 0;
+}
+
+int rafaelia_integration_send_request(rafaelia_integration_hub_t *hub,
+                                     const rafaelia_request_t *request,
+                                     rafaelia_response_callback_t callback,
+                                     void *userdata)
+{
+    rafaelia_response_t resp;
+    int ret = rafaelia_integration_send_request_sync(hub, request, &resp,
+                                                     request ? request->timeout_ms : 1000);
+    if (callback) {
+        callback(&resp, userdata);
+    }
+    return ret;
 }
 
 /* Update connector metrics based on response */
@@ -610,7 +728,38 @@ int rafaelia_integration_publish_event(rafaelia_integration_hub_t *hub,
         }
     }
     
+    pthread_mutex_lock(&hub_lock);
     hub->total_events++;
+    if (event->id == 0) {
+        next_event_id++;
+    }
+    pthread_mutex_unlock(&hub_lock);
     
     return broadcast_count;
+}
+
+int rafaelia_integration_subscribe_event(rafaelia_integration_hub_t *hub,
+                                        uint32_t event_type,
+                                        rafaelia_event_callback_t callback,
+                                        void *userdata)
+{
+    rafaelia_event_t evt;
+    if (!hub || !hub->initialized || !callback) {
+        return -EINVAL;
+    }
+    memset(&evt, 0, sizeof(evt));
+    evt.id = next_event_id++;
+    evt.source = REPO_QEMU_RAFAELIA;
+    evt.event_type = event_type;
+    evt.timestamp = get_timestamp_us();
+    callback(&evt, userdata);
+    return 0;
+}
+
+int rafaelia_integration_update_routing_weights(rafaelia_integration_hub_t *hub)
+{
+    if (!hub || !hub->initialized) {
+        return -EINVAL;
+    }
+    return rafaelia_integration_apply_retroalimentation(hub);
 }

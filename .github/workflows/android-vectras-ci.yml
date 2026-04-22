@@ -1,0 +1,65 @@
+name: Android Vectras CI
+
+on:
+  push:
+    paths:
+      - 'android/vectras-vm-android/**'
+      - '.github/workflows/android-vectras-ci.yml'
+  pull_request:
+    paths:
+      - 'android/vectras-vm-android/**'
+      - '.github/workflows/android-vectras-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android/vectras-vm-android
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/vectras-vm-android/**/*.gradle*', 'android/vectras-vm-android/**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Validate Gradle wrapper script
+        run: |
+          test -x ./gradlew || chmod +x ./gradlew
+
+      - name: Run unit tests
+        run: ./gradlew --no-daemon testDebugUnitTest
+
+      - name: Build debug APK (arm64-v8a)
+        run: ./gradlew --no-daemon assembleDebug
+
+      - name: Upload APK and test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: vectras-debug-apk-and-reports
+          path: |
+            android/vectras-vm-android/app/build/outputs/apk/debug/*.apk
+            android/vectras-vm-android/app/build/reports/tests/testDebugUnitTest/**
+            android/vectras-vm-android/app/build/test-results/testDebugUnitTest/**
+          if-no-files-found: error

@@ -1,6 +1,6 @@
 #include <jni.h>
 #include <stdbool.h>
-#include "hw/core/rafaelia_bridge.h"
+#include "rafaelia_bridge_api.h"
 
 JNIEXPORT jboolean JNICALL
 Java_com_vectras_vm_core_VMService_00024Companion_nativeStartVm(JNIEnv *env,

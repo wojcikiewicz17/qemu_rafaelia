@@ -6,6 +6,20 @@
 #include <string.h>
 #include <time.h>
 
+typedef struct {
+    uint32_t type;
+    uint64_t message_id;
+    uint64_t cycle_id;
+    uint32_t source;
+    uint32_t target;
+    uint32_t priority;
+    uint32_t capabilities;
+    uint32_t ttl_cycles;
+    uint32_t retry_budget;
+    uint64_t timestamp_us;
+    uint32_t payload_size;
+} rafaelia_ipc_digest_header_t;
+
 static const uint32_t blake3_iv[8] = {
     0x6A09E667U, 0xBB67AE85U, 0x3C6EF372U, 0xA54FF53AU,
     0x510E527FU, 0x9B05688CU, 0x1F83D9ABU, 0x5BE0CD19U
@@ -144,6 +158,65 @@ void rafaelia_ipc_log(const char *component,
             msg->capabilities, status, hex);
 }
 
+void rafaelia_ipc_compute_digest(rafaelia_ipc_message_t *msg)
+{
+    uint8_t buf[sizeof(rafaelia_ipc_digest_header_t) + RAFAELIA_IPC_PAYLOAD_MAX + 32];
+    rafaelia_ipc_digest_header_t hdr;
+    size_t total_len;
+
+    memset(&hdr, 0, sizeof(hdr));
+    hdr.type = (uint32_t)msg->type;
+    hdr.message_id = msg->message_id;
+    hdr.cycle_id = msg->cycle_id;
+    hdr.source = (uint32_t)msg->source;
+    hdr.target = (uint32_t)msg->target;
+    hdr.priority = (uint32_t)msg->priority;
+    hdr.capabilities = msg->capabilities;
+    hdr.ttl_cycles = msg->ttl_cycles;
+    hdr.retry_budget = msg->retry_budget;
+    hdr.timestamp_us = msg->timestamp_us;
+    hdr.payload_size = msg->payload_size;
+
+    memcpy(buf, msg->prev_digest, 32);
+    memcpy(buf + 32, &hdr, sizeof(hdr));
+    memcpy(buf + 32 + sizeof(hdr), msg->payload, msg->payload_size);
+    total_len = 32 + sizeof(hdr) + msg->payload_size;
+    rafaelia_blake3_256(buf, total_len, msg->digest);
+}
+
+int rafaelia_ipc_validate_chain(const rafaelia_ipc_runtime_t *rt,
+                                const rafaelia_ipc_message_t *msg)
+{
+    static const uint8_t zero_digest[32] = { 0 };
+    if (msg->ttl_cycles == 0) {
+        return -ETIMEDOUT;
+    }
+    if (rt->chain_initialized) {
+        if (memcmp(msg->prev_digest, rt->last_digest, 32) != 0) {
+            return -EILSEQ;
+        }
+        if (msg->cycle_id <= rt->last_cycle_id) {
+            return -EINVAL;
+        }
+    } else if (memcmp(msg->prev_digest, zero_digest, 32) != 0) {
+        return -EILSEQ;
+    }
+    return 0;
+}
+
+int rafaelia_ipc_advance_cycle(rafaelia_ipc_runtime_t *rt,
+                               const rafaelia_ipc_message_t *msg,
+                               int handler_status)
+{
+    if (handler_status != 0 && msg->retry_budget > 0) {
+        return 0;
+    }
+    memcpy(rt->last_digest, msg->digest, 32);
+    rt->last_cycle_id = msg->cycle_id;
+    rt->chain_initialized = true;
+    return 0;
+}
+
 static int task_compare(const rafaelia_ipc_task_t *a, const rafaelia_ipc_task_t *b)
 {
     if (a->message.priority != b->message.priority) {
@@ -251,10 +324,24 @@ static void *ipc_worker_main(void *opaque)
             break;
         }
         task = heap_pop(rt);
+        if (task != NULL && task->message.ttl_cycles > 0) {
+            task->message.ttl_cycles--;
+        }
         pthread_mutex_unlock(&rt->mutex);
 
+        status = rafaelia_ipc_validate_chain(rt, &task->message);
+        if (status != 0) {
+            rafaelia_ipc_log(rt->name, &task->message, "reject", status);
+            task_complete(task, status);
+            continue;
+        }
+        rafaelia_ipc_compute_digest(&task->message);
         rafaelia_ipc_log(rt->name, &task->message, "dispatch", 0);
         status = rt->handler(&task->message, rt->opaque);
+        if (status != 0 && task->message.retry_budget > 0) {
+            task->message.retry_budget--;
+        }
+        rafaelia_ipc_advance_cycle(rt, &task->message, status);
         rafaelia_ipc_log(rt->name, &task->message, "complete", status);
         task_complete(task, status);
     }

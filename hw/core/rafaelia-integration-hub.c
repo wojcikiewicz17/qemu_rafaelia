@@ -31,6 +31,7 @@ typedef struct {
 static hub_msg_node_t hub_msg_heap[RAFAELIA_IPC_QUEUE_CAPACITY];
 static size_t hub_msg_heap_len;
 static uint64_t hub_seq_counter;
+static uint64_t hub_cycle_counter = 1;
 
 /* Utility: Get current timestamp in microseconds */
 static uint64_t get_timestamp_us(void)
@@ -475,6 +476,17 @@ int rafaelia_integration_send_request_sync(rafaelia_integration_hub_t *hub,
     pthread_mutex_lock(&hub_lock);
     if (req_copy.id == 0) {
         req_copy.id = next_request_id++;
+    }
+    if (req_copy.cycle_id == 0) {
+        req_copy.cycle_id = hub_cycle_counter++;
+    } else if (req_copy.cycle_id < hub_cycle_counter) {
+        req_copy.cycle_id = hub_cycle_counter++;
+    } else {
+        hub_cycle_counter = req_copy.cycle_id + 1;
+    }
+    if (req_copy.ttl_cycles == 0) {
+        pthread_mutex_unlock(&hub_lock);
+        return -ETIMEDOUT;
     }
     if (hub_msg_heap_len >= RAFAELIA_IPC_QUEUE_CAPACITY) {
         pthread_mutex_unlock(&hub_lock);

@@ -1,0 +1,9 @@
+RAFAELIA QEMU DIFF AUDIT
+========================
+commit: 0b7d2dd3
+
+modified_files_in_HEAD:
+(none)
+
+tcg_changes_in_HEAD: NO
+target_arm_changes_in_HEAD: NO

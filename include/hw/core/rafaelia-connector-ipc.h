@@ -12,13 +12,17 @@
 typedef struct {
     rafaelia_message_type_t type;
     uint64_t message_id;
+    uint64_t cycle_id;
     rafaelia_repository_id_t source;
     rafaelia_repository_id_t target;
     rafaelia_priority_t priority;
     uint32_t capabilities;
+    uint32_t ttl_cycles;
+    uint32_t retry_budget;
     uint64_t timestamp_us;
     uint32_t payload_size;
     uint8_t payload[RAFAELIA_IPC_PAYLOAD_MAX];
+    uint8_t prev_digest[32];
     uint8_t digest[32];
 } rafaelia_ipc_message_t;
 
@@ -45,6 +49,9 @@ typedef struct {
     rafaelia_ipc_handler_fn handler;
     void *opaque;
     const char *name;
+    uint8_t last_digest[32];
+    uint64_t last_cycle_id;
+    bool chain_initialized;
 } rafaelia_ipc_runtime_t;
 
 uint64_t rafaelia_ipc_now_us(void);
@@ -64,5 +71,11 @@ int rafaelia_ipc_submit_sync(rafaelia_ipc_runtime_t *rt,
                              uint32_t timeout_ms);
 void rafaelia_ipc_task_init(rafaelia_ipc_task_t *task,
                             const rafaelia_ipc_message_t *msg);
+void rafaelia_ipc_compute_digest(rafaelia_ipc_message_t *msg);
+int rafaelia_ipc_validate_chain(const rafaelia_ipc_runtime_t *rt,
+                                const rafaelia_ipc_message_t *msg);
+int rafaelia_ipc_advance_cycle(rafaelia_ipc_runtime_t *rt,
+                               const rafaelia_ipc_message_t *msg,
+                               int handler_status);
 
 #endif

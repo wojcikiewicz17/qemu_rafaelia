@@ -103,6 +103,9 @@ typedef struct {
     /* Metadata */
     uint64_t timestamp;                    /* Request timestamp */
     uint32_t timeout_ms;                   /* Timeout in milliseconds */
+    uint64_t cycle_id;                     /* Logical cycle id (hub-global) */
+    uint32_t ttl_cycles;                   /* Logical cycle TTL budget */
+    uint32_t retry_budget;                 /* Recoverable error retry budget */
     void *context;                         /* User context */
 } rafaelia_request_t;
 

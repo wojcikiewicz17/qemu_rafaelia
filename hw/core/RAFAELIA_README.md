@@ -412,3 +412,34 @@ safe behavior during host/route bootstrap and core lifecycle:
 
 These changes preserve build compatibility and reduce undefined behavior risks
 from null pointers or implicit type coupling.
+
+## IPC Logical Cycle Gate (Execution Contract)
+
+RAFAELIA IPC uses a **linear digest-chain** per runtime (it is not a Merkle tree).
+
+Message contract fields:
+- `cycle_id` (uint64_t): monotonic logical cycle identifier.
+- `ttl_cycles` (uint32_t): logical cycle budget; zero is immediate reject.
+- `retry_budget` (uint32_t): decremented only on handler recoverable failure.
+- `prev_digest[32]`: previous accepted digest in the runtime chain.
+- `digest[32]`: `BLAKE3(prev_digest || header_without_digest || payload)`.
+
+Validation happens before dispatch:
+1. Reject when `ttl_cycles == 0`.
+2. On first accepted message in a runtime, `prev_digest` must be all-zero.
+3. On subsequent messages, `prev_digest` must match runtime `last_digest`.
+4. `cycle_id` must be strictly greater than `last_cycle_id` after chain initialization.
+
+Runtime execution state:
+- `last_digest[32]`
+- `last_cycle_id`
+- `chain_initialized`
+
+Hub sequencing rule:
+- Hub assigns monotonic `cycle_id` globally when absent and enforces monotonic progression.
+- Requests with `ttl_cycles == 0` are rejected before queue insertion.
+
+Clock model split:
+- Physical clock: host wall time (e.g. pthread timed wait).
+- QEMU virtual time (`icount`): instruction-derived virtual progression.
+- RAFAELIA logical cycle: message causality/order contract independent from wall clock.

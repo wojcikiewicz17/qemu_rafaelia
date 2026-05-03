@@ -51,15 +51,44 @@ jobs:
       - name: Run unit tests
         run: ./gradlew --no-daemon testDebugUnitTest
 
-      - name: Build debug APK (arm64-v8a)
-        run: ./gradlew --no-daemon assembleDebug
+      - name: Build unsigned debug/release APKs (arm32 + arm64)
+        run: ./gradlew --no-daemon assembleDebug assembleRelease
+
+      - name: Build signed release APKs (optional)
+        if: ${{ secrets.ANDROID_SIGNING_KEYSTORE_B64 != '' }}
+        env:
+          ANDROID_SIGNING_KEYSTORE_B64: ${{ secrets.ANDROID_SIGNING_KEYSTORE_B64 }}
+          ANDROID_SIGNING_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
+          ANDROID_SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+          ANDROID_SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
+        run: |
+          echo "$ANDROID_SIGNING_KEYSTORE_B64" | base64 -d > signing-keystore.jks
+          export ANDROID_SIGNING_KEYSTORE_PATH="$PWD/signing-keystore.jks"
+          ./gradlew --no-daemon assembleReleaseSigned
+
+      - name: Collect artifact sizes (MB)
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          root = Path('app/build/outputs/apk')
+          files = sorted(root.rglob('*.apk'))
+          report = ["# APK artifact sizes (MB)", ""]
+          for p in files:
+            mb = p.stat().st_size / (1024 * 1024)
+            report.append(f"- {p.relative_to(Path.cwd())}: {mb:.2f} MB")
+          Path('artifact-sizes.md').write_text("\n".join(report) + "\n", encoding='utf-8')
+          print(Path('artifact-sizes.md').read_text())
+          PY
 
       - name: Upload APK and test reports
         uses: actions/upload-artifact@v4
         with:
-          name: vectras-debug-apk-and-reports
+          name: vectras-apk-and-reports
           path: |
             android/vectras-vm-android/app/build/outputs/apk/debug/*.apk
+            android/vectras-vm-android/app/build/outputs/apk/release/*.apk
+            android/vectras-vm-android/app/build/outputs/apk/releaseSigned/*.apk
             android/vectras-vm-android/app/build/reports/tests/testDebugUnitTest/**
             android/vectras-vm-android/app/build/test-results/testDebugUnitTest/**
+            android/vectras-vm-android/artifact-sizes.md
           if-no-files-found: error

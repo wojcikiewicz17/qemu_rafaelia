@@ -18,12 +18,28 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters += listOf("arm64-v8a")
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a")
         }
 
         externalNativeBuild {
             cmake {
                 cppFlags += "-std=c11"
+            }
+        }
+    }
+
+    signingConfigs {
+        create("releaseCi") {
+            val keystorePath = System.getenv("ANDROID_SIGNING_KEYSTORE_PATH")
+            val keystorePassword = System.getenv("ANDROID_SIGNING_KEYSTORE_PASSWORD")
+            val keyAlias = System.getenv("ANDROID_SIGNING_KEY_ALIAS")
+            val keyPassword = System.getenv("ANDROID_SIGNING_KEY_PASSWORD")
+
+            if (!keystorePath.isNullOrBlank() && !keystorePassword.isNullOrBlank() && !keyAlias.isNullOrBlank() && !keyPassword.isNullOrBlank()) {
+                storeFile = file(keystorePath)
+                storePassword = keystorePassword
+                this.keyAlias = keyAlias
+                this.keyPassword = keyPassword
             }
         }
     }
@@ -36,6 +52,20 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        create("releaseSigned") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("releaseCi")
+            matchingFallbacks += listOf("release")
+        }
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a")
+            isUniversalApk = true
         }
     }
     compileOptions {

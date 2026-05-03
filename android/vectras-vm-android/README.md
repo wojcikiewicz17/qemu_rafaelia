@@ -174,14 +174,16 @@ GoldenTestVectors.LOG2_INT_VECTORS.forEach { vector ->
 ## Build & Native Integration Baseline
 
 - JNI bridge is compiled by `externalNativeBuild` with CMake (`app/src/main/cpp/CMakeLists.txt`).
-- ABI contract is pinned to **arm64-v8a** to align with Android runtime expectations.
+- ABI contract is pinned to **armeabi-v7a + arm64-v8a** with ABI splits enabled to produce dedicated ARM32 and ARM64 artifacts.
 - Release build keeps official optimization path enabled (`minify + shrinkResources`) instead of unsigned shortcuts.
 - Recommended local command sequence:
 
 ```bash
 cd android/vectras-vm-android
 ./gradlew --no-daemon testDebugUnitTest
-./gradlew --no-daemon assembleDebug
+./gradlew --no-daemon assembleDebug assembleRelease
+# Optional signed release (requires keystore env vars)
+./gradlew --no-daemon assembleReleaseSigned
 ```
 
 ## Running Tests
